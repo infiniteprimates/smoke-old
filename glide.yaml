@@ -4,4 +4,5 @@ license: MIT
 import:
 - package: github.com/gin-gonic/gin
 - package: github.com/Sirupsen/logrus
-  version: 0.10.0
+- package: github.com/rcrowley/go-metrics
+- package: github.com/dgrijalva/jwt-go
