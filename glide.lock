@@ -1,6 +1,8 @@
-hash: a46c33640782148478ada4b1a623fc4e29e95d398541f35fc109c6a603ca89bb
-updated: 2016-04-21T00:06:16.22753777-06:00
+hash: 2269d3d9d676ff6e94474419a5fb2bde98cf1dc529365608d686418c5ddff3ad
+updated: 2016-04-24T22:29:55.452627546-06:00
 imports:
+- name: github.com/dgrijalva/jwt-go
+  version: a2c85815a77d0f951e33ba4db5ae93629a1530af
 - name: github.com/gin-gonic/gin
   version: 542be2fe77724f800fcab7eb6c01a4e597fb8506
   subpackages:
@@ -12,8 +14,14 @@ imports:
   - proto
 - name: github.com/manucorporat/sse
   version: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
+- name: github.com/rcrowley/go-metrics
+  version: eeba7bd0dd01ace6e690fa833b3f22aaec29af43
 - name: github.com/Sirupsen/logrus
   version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
+- name: golang.org/x/crypto
+  version: 7b428712abe956d0e9e1e9a01e163fb6c7171438
+  subpackages:
+  - bcrypt
 - name: golang.org/x/net
   version: f315505cf3349909cdf013ea56690da34e96a451
   subpackages:
