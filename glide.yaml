@@ -6,3 +6,6 @@ import:
 - package: github.com/Sirupsen/logrus
 - package: github.com/rcrowley/go-metrics
 - package: github.com/dgrijalva/jwt-go
+- package: golang.org/x/crypto
+  subpackages:
+  - bcrypt

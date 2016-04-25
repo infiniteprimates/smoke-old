@@ -1,5 +1,5 @@
-hash: fe477e684f2fb555c9483b29be0711da442d15ff8b70cebec2679a1fec5588fe
-updated: 2016-04-23T22:01:09.517752937-06:00
+hash: 2269d3d9d676ff6e94474419a5fb2bde98cf1dc529365608d686418c5ddff3ad
+updated: 2016-04-24T22:29:55.452627546-06:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: a2c85815a77d0f951e33ba4db5ae93629a1530af
@@ -18,6 +18,10 @@ imports:
   version: eeba7bd0dd01ace6e690fa833b3f22aaec29af43
 - name: github.com/Sirupsen/logrus
   version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
+- name: golang.org/x/crypto
+  version: 7b428712abe956d0e9e1e9a01e163fb6c7171438
+  subpackages:
+  - bcrypt
 - name: golang.org/x/net
   version: f315505cf3349909cdf013ea56690da34e96a451
   subpackages:
