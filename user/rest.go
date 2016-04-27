@@ -7,7 +7,7 @@ import (
 	"github.com/infiniteprimates/smoke/metrics"
 )
 
-func CreateUserResources(router gin.IRouter, middleware ...gin.HandlerFunc) {
+func CreateUserResources(router gin.IRouter) {
 	router.GET("/user", metrics.MetricsHandler("get_users"), getUsersResource)
 	router.GET("/user/:userid", metrics.MetricsHandler("get_user"), getUserResource)
 }
