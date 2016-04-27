@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -9,10 +10,10 @@ import (
 	"github.com/infiniteprimates/smoke/user"
 	"github.com/rcrowley/go-metrics"
 	"github.com/Sirupsen/logrus"
-	"net/http"
 )
 
 func main() {
+
 	//TODO: get some configuration going here
 	startServer()
 }
@@ -35,7 +36,6 @@ func startServer() {
 	router.Static("/ui", "ui")
 
 	createResources(router)
-
 
 	router.Run() //TODO: make port and listen address configurable
 }

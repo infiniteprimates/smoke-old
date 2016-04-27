@@ -31,16 +31,15 @@ func postAuthorizationResource(ctx *gin.Context) {
 		return
 	}
 
-	if token, err := generateJwt(user) ; err != nil {
+	token, err := generateJwt(user)
+	if err != nil {
 		util.AbortWithStatusAndMessage(ctx, http.StatusInternalServerError, "Unknown error authorizing user")
-		return
-	} else {
-		ctx.JSON(http.StatusOK, gin.H{
-			"type": "bearer",
-			"token": token,
-		})
 		return
 	}
 
+	ctx.JSON(http.StatusOK, gin.H{
+		"type": "bearer",
+		"token": token,
+	})
 }
 
