@@ -6,10 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var statusMessages = map[int]string {
-	http.StatusUnauthorized: "Unauthorized",
+var statusMessages = map[int]string{
+	http.StatusUnauthorized:        "Unauthorized",
 	http.StatusInternalServerError: "Internal server error",
-	http.StatusForbidden: "Forbidden",
+	http.StatusForbidden:           "Forbidden",
 }
 
 func AbortWithStatus(ctx *gin.Context, code int) {
@@ -22,7 +22,7 @@ func AbortWithStatusAndMessage(ctx *gin.Context, code int, msg string) {
 	}
 
 	ctx.JSON(code, gin.H{
-		"code": code,
+		"code":    code,
 		"message": msg,
 	})
 	ctx.Abort()

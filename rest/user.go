@@ -15,7 +15,7 @@ func CreateUserResources(router gin.IRouter) {
 }
 
 func getUsersResource(ctx *gin.Context) {
-	if users, err := db.ListUsers() ; err != nil {
+	if users, err := db.ListUsers(); err != nil {
 		util.AbortWithStatus(ctx, http.StatusInternalServerError)
 	} else {
 		ctx.JSON(http.StatusOK, users)
@@ -24,7 +24,7 @@ func getUsersResource(ctx *gin.Context) {
 
 func getUserResource(ctx *gin.Context) {
 	userId := ctx.Param("userid")
-	if user, err := db.FindUser(userId) ; err != nil {
+	if user, err := db.FindUser(userId); err != nil {
 		util.AbortWithStatus(ctx, http.StatusInternalServerError)
 	} else if user == nil {
 		util.AbortWithStatus(ctx, 404)

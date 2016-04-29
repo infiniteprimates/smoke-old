@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	ISSUER = "Smoke"
+	ISSUER  = "Smoke"
 	JWT_KEY = "s3kr1t"
 )
 
@@ -47,7 +47,7 @@ func postAuthorizationResource(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"type": "bearer",
+		"type":  "bearer",
 		"token": token,
 	})
 }
@@ -57,7 +57,7 @@ func validatePassword(password, hash string) bool {
 	return err == nil
 }
 
-func generateJwt(user *model.User) (string,error) {
+func generateJwt(user *model.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["iss"] = ISSUER
 	token.Claims["sub"] = user.Username

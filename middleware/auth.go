@@ -26,7 +26,7 @@ func AuthorizationMiddleware(requireAdmin bool) gin.HandlerFunc {
 }
 
 func keyFunc(token *jwt.Token) (interface{}, error) {
-	if method, ok := token.Method.(*jwt.SigningMethodHMAC) ; !ok || method.Name != "HS256" {
+	if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok || method.Name != "HS256" {
 		return nil, fmt.Errorf("Unexpected signing method %v", token.Header["alg"])
 	}
 
