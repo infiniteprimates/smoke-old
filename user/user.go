@@ -1,7 +1,7 @@
 package user
 
 type User struct {
-	Username string
-	Password string
-	IsAdmin bool
+	Username string `json:"username"`
+	Password string `json:"-"`
+	IsAdmin bool `json:"isAdmin"`
 }

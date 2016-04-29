@@ -1,10 +1,15 @@
 package util
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 var statusMessages = map[int]string {
-	401: "Unauthorized",
-	500: "Internal server error",
+	http.StatusUnauthorized: "Unauthorized",
+	http.StatusInternalServerError: "Internal server error",
+	http.StatusForbidden: "Forbidden",
 }
 
 func AbortWithStatus(ctx *gin.Context, code int) {
@@ -12,6 +17,10 @@ func AbortWithStatus(ctx *gin.Context, code int) {
 }
 
 func AbortWithStatusAndMessage(ctx *gin.Context, code int, msg string) {
+	if code == http.StatusUnauthorized {
+		ctx.Header("WWW-Authenticate", "Basic realm=\"Smoke\"")
+	}
+
 	ctx.JSON(code, gin.H{
 		"code": code,
 		"message": msg,

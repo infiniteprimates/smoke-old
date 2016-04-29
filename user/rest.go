@@ -4,19 +4,31 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/infiniteprimates/smoke/auth"
 	"github.com/infiniteprimates/smoke/metrics"
+	"github.com/infiniteprimates/smoke/util"
 )
 
 func CreateUserResources(router gin.IRouter) {
-	router.GET("/user", metrics.MetricsHandler("get_users"), getUsersResource)
-	router.GET("/user/:userid", metrics.MetricsHandler("get_user"), getUserResource)
+	router.GET("/user", metrics.MetricsHandler("get_users"), auth.AuthorizationMiddleware(false), getUsersResource)
+	router.GET("/user/:userid", metrics.MetricsHandler("get_user"), auth.AuthorizationMiddleware(false), getUserResource)
 }
 
 func getUsersResource(ctx *gin.Context) {
-	ctx.String(http.StatusOK, "List of users")
+	if users, err := List() ; err != nil {
+		util.AbortWithStatus(ctx, http.StatusInternalServerError)
+	} else {
+		ctx.JSON(http.StatusOK, users)
+	}
 }
 
 func getUserResource(ctx *gin.Context) {
 	userId := ctx.Param("userid")
-	ctx.String(http.StatusOK, "User %s", userId)
+	if user, err := Find(userId) ; err != nil {
+		util.AbortWithStatus(ctx, http.StatusInternalServerError)
+	} else if user == nil {
+		util.AbortWithStatus(ctx, 404)
+	} else {
+		ctx.JSON(http.StatusOK, user)
+	}
 }

@@ -1,8 +1,6 @@
 package user
 
 import (
-	"errors"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,11 +13,18 @@ func init() {
 		Password: string(adminPassword),
 		IsAdmin: true,
 	}
+
+	userPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+	users["user"] = User {
+		Username: "user",
+		Password: string(userPassword),
+		IsAdmin: false,
+	}
 }
 
 func Find(username string) (*User, error) {
 	if user, present := users[username] ; !present {
-		return nil, errors.New("Not found")
+		return nil, nil
 	} else {
 		return &user, nil
 	}
