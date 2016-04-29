@@ -1,28 +1,29 @@
-package user
+package db
 
 import (
+	"github.com/infiniteprimates/smoke/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var users = map[string]User{}
+var users = map[string]model.User{}
 
 func init() {
 	adminPassword, _ := bcrypt.GenerateFromPassword([]byte("secret"), bcrypt.DefaultCost)
-	users["admin"] = User {
+	users["admin"] = model.User {
 		Username: "admin",
 		Password: string(adminPassword),
 		IsAdmin: true,
 	}
 
 	userPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	users["user"] = User {
+	users["user"] = model.User {
 		Username: "user",
 		Password: string(userPassword),
 		IsAdmin: false,
 	}
 }
 
-func Find(username string) (*User, error) {
+func FindUser(username string) (*model.User, error) {
 	if user, present := users[username] ; !present {
 		return nil, nil
 	} else {
@@ -30,8 +31,8 @@ func Find(username string) (*User, error) {
 	}
 }
 
-func List() ([]User, error) {
-	result := make([]User, 0, len(users))
+func ListUsers() ([]model.User, error) {
+	result := make([]model.User, 0, len(users))
 	for _,user := range users {
 		result = append(result, user)
 	}

@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/infiniteprimates/smoke/auth"
-	"github.com/infiniteprimates/smoke/user"
+	"github.com/infiniteprimates/smoke/rest"
 	"github.com/rcrowley/go-metrics"
 	"github.com/Sirupsen/logrus"
 )
@@ -41,6 +40,6 @@ func startServer() {
 }
 
 func createResources(router gin.IRouter) {
-	auth.CreateAuthResources(router)
-	user.CreateUserResources(router)
+	rest.CreateAuthResources(router)
+	rest.CreateUserResources(router)
 }

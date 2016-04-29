@@ -1,21 +1,21 @@
-package user
+package rest
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/infiniteprimates/smoke/auth"
-	"github.com/infiniteprimates/smoke/metrics"
+	"github.com/infiniteprimates/smoke/db"
+	mw "github.com/infiniteprimates/smoke/middleware"
 	"github.com/infiniteprimates/smoke/util"
 )
 
 func CreateUserResources(router gin.IRouter) {
-	router.GET("/user", metrics.MetricsHandler("get_users"), auth.AuthorizationMiddleware(false), getUsersResource)
-	router.GET("/user/:userid", metrics.MetricsHandler("get_user"), auth.AuthorizationMiddleware(false), getUserResource)
+	router.GET("/user", mw.MetricsHandler("get_users"), mw.AuthorizationMiddleware(false), getUsersResource)
+	router.GET("/user/:userid", mw.MetricsHandler("get_user"), mw.AuthorizationMiddleware(false), getUserResource)
 }
 
 func getUsersResource(ctx *gin.Context) {
-	if users, err := List() ; err != nil {
+	if users, err := db.ListUsers() ; err != nil {
 		util.AbortWithStatus(ctx, http.StatusInternalServerError)
 	} else {
 		ctx.JSON(http.StatusOK, users)
@@ -24,7 +24,7 @@ func getUsersResource(ctx *gin.Context) {
 
 func getUserResource(ctx *gin.Context) {
 	userId := ctx.Param("userid")
-	if user, err := Find(userId) ; err != nil {
+	if user, err := db.FindUser(userId) ; err != nil {
 		util.AbortWithStatus(ctx, http.StatusInternalServerError)
 	} else if user == nil {
 		util.AbortWithStatus(ctx, 404)
