@@ -18,6 +18,11 @@ func AuthorizationMiddleware(requireAdmin bool) gin.HandlerFunc {
 			return
 		}
 
+		if requireAdmin && !token.Claims["isAdmin"].(bool) {
+			util.AbortWithStatus(ctx, http.StatusForbidden)
+			return
+		}
+
 		ctx.Set("username", token.Claims["sub"])
 		ctx.Set("isAdmin", token.Claims["isAdmin"])
 
