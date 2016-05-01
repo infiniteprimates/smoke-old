@@ -1,19 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/rest"
 	"github.com/rcrowley/go-metrics"
+	"github.com/spf13/viper"
 )
 
 func main() {
-
-	//TODO: get some configuration going here
+	config.Init()
 	startServer()
 }
 
@@ -23,8 +25,8 @@ func startServer() {
 	defer logWriter.Close()
 
 	// Start background metrics logger
-	//TODO: make metrics logging interval configurable
-	go metrics.Log(metrics.DefaultRegistry, 5*time.Minute, log.New(logWriter, "metrics", log.Lmicroseconds))
+	metricsLoggingInterval := time.Duration(viper.GetInt(config.METRICS_LOGGING_INTERVAL)) * time.Minute
+	go metrics.Log(metrics.DefaultRegistry, metricsLoggingInterval, log.New(logWriter, "metrics", log.Lmicroseconds))
 
 	router := gin.New()
 	router.Use(gin.LoggerWithWriter(logWriter))
@@ -36,7 +38,8 @@ func startServer() {
 
 	createResources(router)
 
-	router.Run() //TODO: make port and listen address configurable
+	ipAndPort := fmt.Sprintf("%s:%d", viper.GetString(config.IP), viper.GetInt(config.PORT))
+	router.Run(ipAndPort)
 }
 
 func createResources(router gin.IRouter) {
