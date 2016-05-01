@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	IP = "ip"
+	IP                       = "ip"
 	METRICS_LOGGING_INTERVAL = "metrics_logging_interval"
-	PORT = "port"
+	PORT                     = "port"
 )
 
 func Init() {
