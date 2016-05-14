@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,9 +18,13 @@ type Server interface {
 
 type server struct {
 	*gin.Engine
+	ip   string
+	port uint16
 }
 
-func New(logWriter io.Writer, db *db.Db) Server {
+func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
+	gin.SetMode(cfg.GetString(config.GIN_MODE))
+
 	router := gin.New()
 	router.Use(gin.LoggerWithWriter(logWriter))
 	router.Use(gin.RecoveryWithWriter(logWriter))
@@ -30,11 +35,23 @@ func New(logWriter io.Writer, db *db.Db) Server {
 
 	createResources(db, router)
 
-	server := &server {
-		Engine: router,
+	ip := cfg.GetString(config.IP)
+	if net.ParseIP(ip) == nil {
+		return nil, fmt.Errorf("Configured listen ip '%s' is invalid", ip)
 	}
 
-	return server
+	port := cfg.GetInt(config.PORT)
+	if port < 1 || port > 65535 {
+		return nil, fmt.Errorf("Configured listen port '%s' is invalid", cfg.GetString(config.PORT))
+	}
+
+	server := &server{
+		Engine: router,
+		ip:     ip,
+		port:   uint16(port),
+	}
+
+	return server, nil
 }
 
 func createResources(db *db.Db, router gin.IRouter) {
@@ -43,7 +60,7 @@ func createResources(db *db.Db, router gin.IRouter) {
 }
 
 func (server *server) Start() {
-	ipAndPort := fmt.Sprintf("%s:%d", viper.GetString(config.IP), viper.GetInt(config.PORT))
+	ipAndPort := fmt.Sprintf("%s:%d", server.ip, server.port)
+	//TODO: Log ipAndPort here
 	server.Run(ipAndPort)
 }
-
