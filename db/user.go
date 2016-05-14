@@ -5,7 +5,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type user struct {}
+type user struct{}
 
 var users = map[string]model.User{}
 

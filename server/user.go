@@ -15,7 +15,7 @@ func createUserResources(db *db.Db, router gin.IRouter) {
 }
 
 func getUsersResource(db *db.Db) gin.HandlerFunc {
-	return func (ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		if users, err := db.ListUsers(); err != nil {
 			util.AbortWithStatus(ctx, http.StatusInternalServerError)
 		} else {

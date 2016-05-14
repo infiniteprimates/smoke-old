@@ -7,10 +7,10 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/infiniteprimates/smoke/config"
+	"github.com/infiniteprimates/smoke/db"
 	"github.com/infiniteprimates/smoke/server"
 	"github.com/rcrowley/go-metrics"
 	"github.com/spf13/viper"
-	"github.com/infiniteprimates/smoke/db"
 )
 
 func main() {
@@ -18,18 +18,23 @@ func main() {
 	logWriter := logger.Writer()
 	defer logWriter.Close()
 
-	config.Init()
+	cfg := config.New()
 
-	startMetricsLogging(logWriter)
+	startMetricsLogging(cfg, logWriter)
 
 	db := db.New()
 
-	server := server.New(logWriter, db)
-	server.Start()
+	srv, err := server.New(logWriter, cfg, db)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	srv.Start()
 }
 
-func startMetricsLogging(logWriter io.Writer) {
+func startMetricsLogging(cfg *viper.Viper, logWriter io.Writer) {
 	// Start background metrics logger
-	metricsLoggingInterval := time.Duration(viper.GetInt(config.METRICS_LOGGING_INTERVAL)) * time.Minute
+	metricsLoggingInterval := time.Duration(cfg.GetInt(config.METRICS_LOGGING_INTERVAL)) * time.Minute
 	go metrics.Log(metrics.DefaultRegistry, metricsLoggingInterval, log.New(logWriter, "metrics", log.Lmicroseconds))
 }
