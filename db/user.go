@@ -5,6 +5,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type user struct {}
+
 var users = map[string]model.User{}
 
 func init() {
@@ -23,7 +25,7 @@ func init() {
 	}
 }
 
-func FindUser(username string) (*model.User, error) {
+func (user *user) FindUser(username string) (*model.User, error) {
 	if user, present := users[username]; !present {
 		return nil, nil
 	} else {
@@ -31,7 +33,7 @@ func FindUser(username string) (*model.User, error) {
 	}
 }
 
-func ListUsers() ([]model.User, error) {
+func (user *user) ListUsers() ([]model.User, error) {
 	result := make([]model.User, 0, len(users))
 	for _, user := range users {
 		result = append(result, user)
