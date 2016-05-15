@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/db"
+	mw "github.com/infiniteprimates/smoke/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -31,7 +32,7 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 
 	//TODO: Create a static content handler that works without directory listing.
 	root := cfg.GetString(config.UI_ROOT)
-	router.NoRoute(static.Serve("/", static.LocalFile(root, true)))
+	router.NoRoute(mw.MetricsHandler("static"), static.Serve("/", static.LocalFile(root, true)))
 
 	createResources(db, router)
 
