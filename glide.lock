@@ -1,5 +1,5 @@
-hash: 8a995fc76604f100d51a0df79738779bff026b716274deee01ab7722f3dd95b6
-updated: 2016-05-01T01:00:18.624998562-06:00
+hash: c29251239bfec388368504992bb6f9d71fb9d689ac83dcdb8b9b94b469bf4abd
+updated: 2016-05-14T17:09:50.314529955-06:00
 imports:
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
@@ -7,6 +7,10 @@ imports:
   version: a2c85815a77d0f951e33ba4db5ae93629a1530af
 - name: github.com/fsnotify/fsnotify
   version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
+- name: github.com/gin-gonic/contrib
+  version: 120df5cf76f14a246b04f0e35d5ee029b14d8dfb
+  subpackages:
+  - static
 - name: github.com/gin-gonic/gin
   version: 542be2fe77724f800fcab7eb6c01a4e597fb8506
   subpackages:

@@ -11,6 +11,7 @@ const (
 	IP                       = "ip"
 	METRICS_LOGGING_INTERVAL = "metrics_logging_interval"
 	PORT                     = "port"
+	UI_ROOT                  = "ui_root"
 )
 
 var (
@@ -34,6 +35,7 @@ func New() *viper.Viper {
 func setDefaults(config *viper.Viper) {
 	config.SetDefault(GIN_MODE, "release")
 	config.SetDefault(IP, "0.0.0.0")
-	config.SetDefault(PORT, 8080)
 	config.SetDefault(METRICS_LOGGING_INTERVAL, 5)
+	config.SetDefault(PORT, 8080)
+	config.SetDefault(UI_ROOT, "dist")
 }
