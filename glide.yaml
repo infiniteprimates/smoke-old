@@ -10,3 +10,6 @@ import:
   subpackages:
   - bcrypt
 - package: github.com/spf13/viper
+- package: github.com/gin-gonic/contrib
+  subpackages:
+  - static

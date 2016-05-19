@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
 
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/db"
+	mw "github.com/infiniteprimates/smoke/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -29,9 +30,9 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 	router.Use(gin.LoggerWithWriter(logWriter))
 	router.Use(gin.RecoveryWithWriter(logWriter))
 
-	//TODO: Figure out how to do static better with router.NoRoute and contrib static. Doesn't work right though.
-	router.Any("/", func(ctx *gin.Context) { ctx.Redirect(http.StatusTemporaryRedirect, "/ui/") })
-	router.Static("/ui", "ui")
+	//TODO: Create a static content handler that works without directory listing.
+	root := cfg.GetString(config.UI_ROOT)
+	router.NoRoute(mw.MetricsHandler("static"), static.Serve("/", static.LocalFile(root, true)))
 
 	createResources(db, router)
 
