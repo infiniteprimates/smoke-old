@@ -3,36 +3,39 @@ package server
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/infiniteprimates/smoke/db"
-	mw "github.com/infiniteprimates/smoke/middleware"
 	"github.com/infiniteprimates/smoke/util"
+	"github.com/labstack/echo"
 )
 
-func createUserResources(db *db.Db, router gin.IRouter) {
-	router.GET("/user", mw.MetricsHandler("get_users"), mw.AuthorizationMiddleware(false), getUsersResource(db))
-	router.GET("/user/:userid", mw.MetricsHandler("get_user"), mw.AuthorizationMiddleware(false), getUserResource(db))
+func createUserResources(db *db.Db, group *echo.Group) {
+	group.GET("/user", getUsersResource(db), metricsHandler("get_users"), authorizationMiddleware())
+	group.GET("/user/:userid", getUserResource(db), metricsHandler("get_user"), authorizationMiddleware())
 }
 
-func getUsersResource(db *db.Db) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+func getUsersResource(db *db.Db) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		if users, err := db.ListUsers(); err != nil {
-			util.AbortWithStatus(ctx, http.StatusInternalServerError)
+			return err
 		} else {
-			ctx.JSON(http.StatusOK, users)
+			c.JSON(http.StatusOK, users)
 		}
+
+		return nil
 	}
 }
 
-func getUserResource(db *db.Db) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		userId := ctx.Param("userid")
+func getUserResource(db *db.Db) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId := c.Param("userid")
 		if user, err := db.FindUser(userId); err != nil {
-			util.AbortWithStatus(ctx, http.StatusInternalServerError)
+			return err
 		} else if user == nil {
-			util.AbortWithStatus(ctx, 404)
+			util.AbortWithStatus(c, 404)
 		} else {
-			ctx.JSON(http.StatusOK, user)
+			c.JSON(http.StatusOK, user)
 		}
+
+		return nil
 	}
 }
