@@ -34,7 +34,7 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 	e.Use(middleware.Recover())
 
 	root := cfg.GetString(config.UI_ROOT)
-	e.Static("/", root)
+	e.Use(middleware.Static(root))
 
 	createResources(db, e)
 
