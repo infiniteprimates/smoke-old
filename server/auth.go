@@ -14,15 +14,15 @@ import (
 )
 
 const ( //TODO: Put key into config
-	ISSUER  = "Smoke"
-	JWT_KEY = "s3kr1t"
+	ISSUER        = "Smoke"
+	JWT_KEY       = "s3kr1t"
 	METHOD_BEARER = "Bearer"
 )
 
 type (
 	authResponse struct {
 		AuthType string `json:"type"`
-		Token string `json:"token"`
+		Token    string `json:"token"`
 	}
 )
 
@@ -52,8 +52,8 @@ func postAuthorizationResource(db *db.Db) echo.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, &authResponse{
-			AuthType:  "bearer",
-			Token: token,
+			AuthType: "bearer",
+			Token:    token,
 		})
 
 		return nil
