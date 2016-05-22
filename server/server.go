@@ -5,11 +5,11 @@ import (
 	"io"
 	"net"
 
-	"github.com/gin-gonic/contrib/static"
-	"github.com/gin-gonic/gin"
 	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/db"
-	mw "github.com/infiniteprimates/smoke/middleware"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/engine/fasthttp"
+	"github.com/labstack/echo/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -18,23 +18,25 @@ type Server interface {
 }
 
 type server struct {
-	*gin.Engine
+	*echo.Echo
 	ip   string
 	port uint16
 }
 
 func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
-	gin.SetMode(cfg.GetString(config.GIN_MODE))
+	e := echo.New()
+	if(cfg.GetBool(config.DEBUG)) {
+		e.SetDebug(false)
+	}
 
-	router := gin.New()
-	router.Use(gin.LoggerWithWriter(logWriter))
-	router.Use(gin.RecoveryWithWriter(logWriter))
+	middleware.DefaultLoggerConfig.Output = logWriter
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	//TODO: Create a static content handler that works without directory listing.
 	root := cfg.GetString(config.UI_ROOT)
-	router.NoRoute(mw.MetricsHandler("static"), static.Serve("/", static.LocalFile(root, true)))
+	e.Static("/", root)
 
-	createResources(db, router)
+	createResources(db, e)
 
 	ip := cfg.GetString(config.IP)
 	if net.ParseIP(ip) == nil {
@@ -47,7 +49,7 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 	}
 
 	server := &server{
-		Engine: router,
+		Echo: e,
 		ip:     ip,
 		port:   uint16(port),
 	}
@@ -55,13 +57,14 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 	return server, nil
 }
 
-func createResources(db *db.Db, router gin.IRouter) {
-	createAuthResources(db, router)
-	createUserResources(db, router)
+func createResources(db *db.Db, e *echo.Echo) {
+	g := e.Group("/api")
+	createAuthResources(db, g)
+	createUserResources(db, g)
 }
 
 func (server *server) Start() {
 	ipAndPort := fmt.Sprintf("%s:%d", server.ip, server.port)
 	//TODO: Log ipAndPort here
-	server.Run(ipAndPort)
+	server.Run(fasthttp.New(ipAndPort))
 }
