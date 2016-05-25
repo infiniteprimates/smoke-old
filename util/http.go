@@ -8,10 +8,11 @@ import (
 
 type (
 	Status struct {
-		Code int `json:"code"`
+		Code    int    `json:"code"`
 		Message string `json:"message"`
 	}
 )
+
 var statusMessages = map[int]string{
 	http.StatusUnauthorized:        "Unauthorized",
 	http.StatusInternalServerError: "Internal server error",

@@ -25,13 +25,22 @@ type server struct {
 
 func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 	e := echo.New()
-	if(cfg.GetBool(config.DEBUG)) {
+	if cfg.GetBool(config.DEBUG) {
 		e.SetDebug(false)
 	}
 
-	middleware.DefaultLoggerConfig.Output = logWriter
-	e.Use(middleware.Logger())
+	logConfig := middleware.DefaultLoggerConfig
+	logConfig.Output = logWriter
+	e.Use(middleware.LoggerWithConfig(logConfig))
+
 	e.Use(middleware.Recover())
+
+	if cfg.GetBool(config.DEV_CORS) {
+		corsConfig := middleware.DefaultCORSConfig
+		corsConfig.AllowHeaders = []string{echo.HeaderOrigin, echo.HeaderAuthorization, echo.HeaderContentType}
+		corsConfig.MaxAge = 60
+		e.Use(middleware.CORSWithConfig(corsConfig))
+	}
 
 	root := cfg.GetString(config.UI_ROOT)
 	e.Use(middleware.Static(root))
@@ -50,8 +59,8 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 
 	server := &server{
 		Echo: e,
-		ip:     ip,
-		port:   uint16(port),
+		ip:   ip,
+		port: uint16(port),
 	}
 
 	return server, nil
