@@ -23,5 +23,5 @@ func NewDbError(code dbErrorCode, message string) error {
 }
 
 func (e *dbError) Error() string {
-	return fmt.Sprintf("DB Error: Code = '%d', Message = '%s'")
+	return fmt.Sprintf("DB Error: Code = '%d', Message = '%s'", e.Code, e.Message)
 }

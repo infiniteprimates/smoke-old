@@ -37,7 +37,7 @@ func (db *UserDb) Create(user *User) (*User, error) {
 func (db *UserDb) Find(userId string) (*User, error) {
 	userEntity, present := users[userId]
 	if !present {
-		return nil, NewDbError(DbNotFound, fmt.Sprintf("User '%s' not found."))
+		return nil, NewDbError(DbNotFound, fmt.Sprintf("User '%s' not found.", userId))
 	}
 
 	return &userEntity, nil
