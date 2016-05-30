@@ -6,27 +6,32 @@ import (
 	"net"
 
 	"github.com/infiniteprimates/smoke/config"
-	"github.com/infiniteprimates/smoke/db"
+	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/fasthttp"
 	"github.com/labstack/echo/middleware"
 	"github.com/spf13/viper"
 )
 
-type Server interface {
-	Start()
-}
+type (
+	server struct {
+		*echo.Echo
+		ip   string
+		port uint16
+	}
 
-type server struct {
-	*echo.Echo
-	ip   string
-	port uint16
-}
+	Server interface {
+		Start()
+	}
+)
 
-func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
+func New(logWriter io.Writer, cfg *viper.Viper, userService *service.UserService, passwordService *service.PasswordService) (Server, error) {
 	e := echo.New()
-	if cfg.GetBool(config.DEBUG) {
-		e.SetDebug(false)
+
+	e.SetHTTPErrorHandler(smokeErrorHandler(e))
+
+	if debug := cfg.GetBool(config.Debug); debug {
+		e.SetDebug(debug)
 	}
 
 	logConfig := middleware.DefaultLoggerConfig
@@ -35,26 +40,26 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 
 	e.Use(middleware.Recover())
 
-	if cfg.GetBool(config.DEV_CORS) {
+	if cfg.GetBool(config.DevCors) {
 		corsConfig := middleware.DefaultCORSConfig
 		corsConfig.AllowHeaders = []string{echo.HeaderOrigin, echo.HeaderAuthorization, echo.HeaderContentType}
 		corsConfig.MaxAge = 60
 		e.Use(middleware.CORSWithConfig(corsConfig))
 	}
 
-	root := cfg.GetString(config.UI_ROOT)
+	root := cfg.GetString(config.UiRoot)
 	e.Use(middleware.Static(root))
 
-	createResources(db, e)
+	createResources(userService, passwordService, e)
 
-	ip := cfg.GetString(config.IP)
+	ip := cfg.GetString(config.Ip)
 	if net.ParseIP(ip) == nil {
 		return nil, fmt.Errorf("Configured listen ip '%s' is invalid", ip)
 	}
 
-	port := cfg.GetInt(config.PORT)
+	port := cfg.GetInt(config.Port)
 	if port < 1 || port > 65535 {
-		return nil, fmt.Errorf("Configured listen port '%s' is invalid", cfg.GetString(config.PORT))
+		return nil, fmt.Errorf("Configured listen port '%s' is invalid", cfg.GetString(config.Port))
 	}
 
 	server := &server{
@@ -66,10 +71,10 @@ func New(logWriter io.Writer, cfg *viper.Viper, db *db.Db) (Server, error) {
 	return server, nil
 }
 
-func createResources(db *db.Db, e *echo.Echo) {
+func createResources(userService *service.UserService, passwordService *service.PasswordService, e *echo.Echo) {
 	g := e.Group("/api")
-	createAuthResources(db, g)
-	createUserResources(db, g)
+	createAuthResources(userService, passwordService, g)
+	createUserResources(userService, g)
 }
 
 func (server *server) Start() {
