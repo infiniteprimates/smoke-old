@@ -77,7 +77,7 @@ func (s *UserService) Update(userModel *model.User) (*model.User, error) {
 		userEntity.Password = userEntityFromModel.Password
 	}
 
-	userEntity, err := s.userDb.Update(userEntity)
+	userEntity, err = s.userDb.Update(userEntity)
 	if err != nil {
 		return nil, err
 	}
