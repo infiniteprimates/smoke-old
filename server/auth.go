@@ -5,18 +5,16 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/infiniteprimates/smoke/db"
 	"github.com/infiniteprimates/smoke/model"
-	"github.com/infiniteprimates/smoke/util"
+	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"golang.org/x/crypto/bcrypt"
 )
 
 const ( //TODO: Put key into config
-	ISSUER        = "Smoke"
-	JWT_KEY       = "s3kr1t"
-	METHOD_BEARER = "Bearer"
+	Issuer       = "Smoke"
+	JwtKey       = "s3kr1t"
+	MethodBearer = "Bearer"
 )
 
 type (
@@ -26,24 +24,22 @@ type (
 	}
 )
 
-func createAuthResources(db *db.Db, group *echo.Group) {
-	group.POST("/auth", postAuthorizationResource(db), metricsHandler("get_auth"), basicAuthExtractor())
+func createAuthResources(userService *service.UserService, passwordService *service.PasswordService, group *echo.Group) {
+	group.POST("/auth", postAuthorizationResource(userService, passwordService), metricsHandler("get_auth"), basicAuthExtractor())
 }
 
-func postAuthorizationResource(db *db.Db) echo.HandlerFunc {
+func postAuthorizationResource(userService *service.UserService, passwordService *service.PasswordService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		username := c.Get("username").(string)
 		password := c.Get("password").(string)
 
-		user, err := db.FindUser(username)
+		user, err := userService.Find(username, true)
 		if err != nil {
-			util.AbortWithStatus(c, http.StatusUnauthorized)
-			return nil
+			return newStatus(http.StatusUnauthorized)
 		}
 
-		if !validatePassword(password, user.Password) {
-			util.AbortWithStatus(c, http.StatusUnauthorized)
-			return nil
+		if !passwordService.ValidatePassword(password, user.Password) {
+			return newStatus(http.StatusUnauthorized)
 		}
 
 		token, err := generateJwt(user)
@@ -51,32 +47,37 @@ func postAuthorizationResource(db *db.Db) echo.HandlerFunc {
 			return err
 		}
 
-		c.JSON(http.StatusOK, &authResponse{
+		return c.JSON(http.StatusOK, &authResponse{
 			AuthType: "bearer",
 			Token:    token,
 		})
-
-		return nil
 	}
-}
-
-func validatePassword(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }
 
 func generateJwt(user *model.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["iss"] = ISSUER
+	token.Claims["iss"] = Issuer
 	token.Claims["sub"] = user.Username
 	token.Claims["exp"] = time.Now().Add(1 * time.Hour).Unix()
 	token.Claims["isAdmin"] = user.IsAdmin
 
-	return token.SignedString([]byte(JWT_KEY))
+	return token.SignedString([]byte(JwtKey))
 }
 
 func authorizationMiddleware() echo.MiddlewareFunc {
-	return middleware.JWT([]byte(JWT_KEY))
+	return middleware.JWT([]byte(JwtKey))
+}
+
+func requireAdminMiddleware(message string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			user := c.Get("user").(*jwt.Token)
+			if !user.Claims["isAdmin"].(bool) {
+				return newStatusWithMessage(http.StatusForbidden, message)
+			}
+			return next(c)
+		}
+	}
 }
 
 func basicAuthExtractor() echo.MiddlewareFunc {

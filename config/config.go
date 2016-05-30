@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	DEBUG                    = "debug"
-	DEV_CORS                 = "dev_cors"
-	IP                       = "ip"
-	METRICS_LOGGING_INTERVAL = "metrics_logging_interval"
-	PORT                     = "port"
-	UI_ROOT                  = "ui_root"
+	Debug                  = "debug"
+	DevCors                = "dev_cors"
+	Ip                     = "ip"
+	MetricsLoggingInterval = "metrics_logging_interval"
+	Port                   = "port"
+	UiRoot                 = "ui_root"
 )
 
 var (
@@ -34,10 +34,10 @@ func New() *viper.Viper {
 }
 
 func setDefaults(config *viper.Viper) {
-	config.SetDefault(DEBUG, false)
-	config.SetDefault(DEV_CORS, false)
-	config.SetDefault(IP, "0.0.0.0")
-	config.SetDefault(METRICS_LOGGING_INTERVAL, 5)
-	config.SetDefault(PORT, 8080)
-	config.SetDefault(UI_ROOT, "dist")
+	config.SetDefault(Debug, false)
+	config.SetDefault(DevCors, false)
+	config.SetDefault(Ip, "0.0.0.0")
+	config.SetDefault(MetricsLoggingInterval, 5)
+	config.SetDefault(Port, 8080)
+	config.SetDefault(UiRoot, "dist")
 }

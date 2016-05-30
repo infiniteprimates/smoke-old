@@ -1,42 +1,66 @@
 package db
 
 import (
-	"github.com/infiniteprimates/smoke/model"
-	"golang.org/x/crypto/bcrypt"
+	"errors"
+	"fmt"
+
+	"github.com/spf13/viper"
 )
 
-type user struct{}
+type (
+	UserDb struct{}
 
-var users = map[string]model.User{}
-
-func init() {
-	adminPassword, _ := bcrypt.GenerateFromPassword([]byte("secret"), bcrypt.DefaultCost)
-	users["admin"] = model.User{
-		Username: "admin",
-		Password: string(adminPassword),
-		IsAdmin:  true,
+	User struct {
+		Username string
+		Password string
+		IsAdmin  bool
 	}
+)
 
-	userPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	users["user"] = model.User{
-		Username: "user",
-		Password: string(userPassword),
-		IsAdmin:  false,
-	}
+// Yes, I know the map isn't threadsafe. It's temporary.
+var users = map[string]User{}
+
+func NewUserDb(cfg *viper.Viper) (*UserDb, error) {
+	return &UserDb{}, nil
 }
 
-func (user *user) FindUser(username string) (*model.User, error) {
-	if user, present := users[username]; !present {
-		return nil, nil
-	} else {
-		return &user, nil
+func (db *UserDb) Create(user *User) (*User, error) {
+	if _, present := users[user.Username]; present {
+		return nil, errors.New("User already exists")
 	}
+
+	users[user.Username] = *user
+
+	return user, nil
 }
 
-func (user *user) ListUsers() ([]model.User, error) {
-	result := make([]model.User, 0, len(users))
+func (db *UserDb) Find(userId string) (*User, error) {
+	userEntity, present := users[userId]
+	if !present {
+		return nil, NewDbError(DbNotFound, fmt.Sprintf("User '%s' not found."))
+	}
+
+	return &userEntity, nil
+}
+
+func (db *UserDb) List() ([]*User, error) {
+	userList := make([]*User, len(users), len(users))
+	i := 0
 	for _, user := range users {
-		result = append(result, user)
+		//TODO:Temp can be removed when this is a real database
+		temp := user
+		userList[i] = &temp
+		i++
 	}
-	return result, nil
+	return userList, nil
+}
+
+func (db *UserDb) Update(user *User) (*User, error) {
+	users[user.Username] = *user
+	return user, nil
+}
+
+func (db *UserDb) Delete(userId string) error {
+	delete(users, userId)
+	return nil
 }
