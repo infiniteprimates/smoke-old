@@ -25,10 +25,10 @@ func newStatus(code int) error {
 	return newStatusWithMessage(code, statusMessages[code])
 }
 
-func newStatusWithMessage(code int, msg string) error {
+func newStatusWithMessage(code int, format string, args ...interface{}) error {
 	return &smokeStatus{
 		Code:    code,
-		Message: msg,
+		Message: fmt.Sprintf(format, args...),
 	}
 }
 

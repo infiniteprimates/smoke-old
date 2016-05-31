@@ -14,12 +14,13 @@ type (
 )
 
 const (
-	DbNotFound dbErrorCode = iota
-	DbUnknown
+	EntityNotFound dbErrorCode = iota
+	EntityExists
+	Unknown
 )
 
-func NewDbError(code dbErrorCode, message string) error {
-	return &dbError{code, message}
+func NewDbError(code dbErrorCode, format string, args ...interface{}) error {
+	return &dbError{code, fmt.Sprintf(format, args...)}
 }
 
 func (e *dbError) Error() string {

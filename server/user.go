@@ -1,21 +1,24 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/model"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 )
 
-func createUserResources(userService *service.UserService, group *echo.Group) {
-	group.POST("/user", createUserResource(userService), metricsHandler("post_user"), authorizationMiddleware(), requireAdminMiddleware("Only admins may create users."))
-	group.GET("/user", getUsersResource(userService), metricsHandler("get_users"), authorizationMiddleware())
-	group.GET("/user/:userid", getUserResource(userService), metricsHandler("get_user"), authorizationMiddleware())
-	group.PUT("/user/:userid", updateUserResource(userService), metricsHandler("update_user"), authorizationMiddleware())
-	group.DELETE("/user/:userid", deleteUserResource(userService), metricsHandler("delete_user"), authorizationMiddleware(), requireAdminMiddleware("Only admins may delete users."))
+func createUserResources(group *echo.Group, cfg *config.Config, userService *service.UserService) {
+	jwtKey := cfg.GetString(config.JwtKey)
+
+	group.POST("/user", createUserResource(userService), metricsHandler("post_user"), authorizationMiddleware(jwtKey), requireAdminMiddleware("Only admins may create users."))
+	group.GET("/user", getUsersResource(userService), metricsHandler("get_users"), authorizationMiddleware(jwtKey))
+	group.GET("/user/:userid", getUserResource(userService), metricsHandler("get_user"), authorizationMiddleware(jwtKey))
+	group.PUT("/user/:userid", updateUserResource(userService), metricsHandler("update_user"), authorizationMiddleware(jwtKey))
+	group.DELETE("/user/:userid", deleteUserResource(userService), metricsHandler("delete_user"), authorizationMiddleware(jwtKey), requireAdminMiddleware("Only admins may delete users."))
+	//group.PUT("/user/:userid/password", updateUserPasswordResource(userService), metricsHandler("update_user_password", authorizationMiddleware(jwtKey)))
 }
 
 func createUserResource(s *service.UserService) echo.HandlerFunc {
@@ -38,7 +41,7 @@ func createUserResource(s *service.UserService) echo.HandlerFunc {
 func getUserResource(s *service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
-		user, err := s.Find(userId, false)
+		user, err := s.Find(userId)
 		if err != nil {
 			return newStatus(404)
 		}
@@ -70,7 +73,7 @@ func updateUserResource(s *service.UserService) echo.HandlerFunc {
 		}
 
 		if user.Username != userId {
-			return newStatusWithMessage(http.StatusBadRequest, fmt.Sprintf("Url userId '%s' and json userId '%s' are mismatched.", userId, user.Username))
+			return newStatusWithMessage(http.StatusBadRequest, "Url userId '%s' and json userId '%s' are mismatched.", userId, user.Username)
 		}
 
 		if authUser != userId && !isAdmin {
@@ -79,6 +82,10 @@ func updateUserResource(s *service.UserService) echo.HandlerFunc {
 
 		if !isAdmin && user.IsAdmin {
 			return newStatusWithMessage(http.StatusForbidden, "Only admins may make other users admins.")
+		}
+
+		if isAdmin && !user.IsAdmin && authUser == user.Username {
+			return newStatusWithMessage(http.StatusBadRequest, "For your own safety, I'm not going to allow you to remove admin privileges from yourself.")
 		}
 
 		user, err := s.Update(user)

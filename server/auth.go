@@ -2,19 +2,11 @@ package server
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/infiniteprimates/smoke/model"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-)
-
-const ( //TODO: Put key into config
-	Issuer       = "Smoke"
-	JwtKey       = "s3kr1t"
-	MethodBearer = "Bearer"
 )
 
 type (
@@ -24,27 +16,18 @@ type (
 	}
 )
 
-func createAuthResources(userService *service.UserService, passwordService *service.PasswordService, group *echo.Group) {
-	group.POST("/auth", postAuthorizationResource(userService, passwordService), metricsHandler("get_auth"), basicAuthExtractor())
+func createAuthResources(group *echo.Group, authService *service.AuthService) {
+	group.POST("/auth", postAuthorizationResource(authService), metricsHandler("get_auth"), basicAuthExtractor())
 }
 
-func postAuthorizationResource(userService *service.UserService, passwordService *service.PasswordService) echo.HandlerFunc {
+func postAuthorizationResource(authService *service.AuthService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		username := c.Get("username").(string)
 		password := c.Get("password").(string)
 
-		user, err := userService.Find(username, true)
+		token, err := authService.AuthenticateUser(username, password)
 		if err != nil {
 			return newStatus(http.StatusUnauthorized)
-		}
-
-		if !passwordService.ValidatePassword(password, user.Password) {
-			return newStatus(http.StatusUnauthorized)
-		}
-
-		token, err := generateJwt(user)
-		if err != nil {
-			return err
 		}
 
 		return c.JSON(http.StatusOK, &authResponse{
@@ -54,18 +37,8 @@ func postAuthorizationResource(userService *service.UserService, passwordService
 	}
 }
 
-func generateJwt(user *model.User) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["iss"] = Issuer
-	token.Claims["sub"] = user.Username
-	token.Claims["exp"] = time.Now().Add(1 * time.Hour).Unix()
-	token.Claims["isAdmin"] = user.IsAdmin
-
-	return token.SignedString([]byte(JwtKey))
-}
-
-func authorizationMiddleware() echo.MiddlewareFunc {
-	return middleware.JWT([]byte(JwtKey))
+func authorizationMiddleware(jwtKey string) echo.MiddlewareFunc {
+	return middleware.JWT([]byte(jwtKey))
 }
 
 func requireAdminMiddleware(message string) echo.MiddlewareFunc {

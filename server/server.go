@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/fasthttp"
 	"github.com/labstack/echo/middleware"
-	"github.com/spf13/viper"
 )
 
 type (
@@ -25,7 +24,7 @@ type (
 	}
 )
 
-func New(logWriter io.Writer, cfg *viper.Viper, userService *service.UserService, passwordService *service.PasswordService) (Server, error) {
+func New(logWriter io.Writer, cfg *config.Config, userService *service.UserService, authService *service.AuthService) (Server, error) {
 	e := echo.New()
 
 	e.SetHTTPErrorHandler(smokeErrorHandler(e))
@@ -50,7 +49,7 @@ func New(logWriter io.Writer, cfg *viper.Viper, userService *service.UserService
 	root := cfg.GetString(config.UiRoot)
 	e.Use(middleware.Static(root))
 
-	createResources(userService, passwordService, e)
+	createResources(e, cfg, userService, authService)
 
 	ip := cfg.GetString(config.Ip)
 	if net.ParseIP(ip) == nil {
@@ -71,10 +70,10 @@ func New(logWriter io.Writer, cfg *viper.Viper, userService *service.UserService
 	return server, nil
 }
 
-func createResources(userService *service.UserService, passwordService *service.PasswordService, e *echo.Echo) {
+func createResources(e *echo.Echo, cfg *config.Config, userService *service.UserService, authService *service.AuthService) {
 	g := e.Group("/api")
-	createAuthResources(userService, passwordService, g)
-	createUserResources(userService, g)
+	createAuthResources(g, authService)
+	createUserResources(g, cfg, userService)
 }
 
 func (server *server) Start() {
