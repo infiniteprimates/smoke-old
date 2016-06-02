@@ -43,6 +43,15 @@ func smokeErrorHandler(e *echo.Echo) echo.HTTPErrorHandler {
 			if !c.Response().Committed() {
 				c.JSON(status.Code, status)
 			}
+		} else if httpError, ok := err.(*echo.HTTPError); ok {
+			status := &smokeStatus{
+				Code:    httpError.Code,
+				Message: httpError.Message,
+			}
+
+			if !c.Response().Committed() {
+				c.JSON(status.Code, status)
+			}
 		} else {
 			defaultHttpErrorHandler(err, c)
 		}

@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+	//TODO: look into newer logging in echo.
 	logger := logrus.New()
 	logWriter := logger.Writer()
 	defer logWriter.Close()
@@ -62,11 +63,11 @@ func initAccounts(userService *service.UserService) {
 		Username: "admin",
 		IsAdmin:  true,
 	})
-	userService.UpdateUserPassword("admin", "secret")
+	userService.UpdateUserPassword("admin", &model.PasswordReset{NewPassword: "secret"}, true)
 
 	userService.Create(&model.User{
 		Username: "user",
 		IsAdmin:  false,
 	})
-	userService.UpdateUserPassword("user", "password")
+	userService.UpdateUserPassword("user", &model.PasswordReset{NewPassword: "password"}, true)
 }

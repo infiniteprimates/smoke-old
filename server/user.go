@@ -10,15 +10,16 @@ import (
 	"github.com/labstack/echo"
 )
 
-func createUserResources(group *echo.Group, cfg *config.Config, userService *service.UserService) {
-	jwtKey := cfg.GetString(config.JwtKey)
+func createUserResources(r router, cfg *config.Config, userService *service.UserService) {
+	group := r.Group("/users")
 
-	group.POST("/user", createUserResource(userService), metricsHandler("post_user"), authorizationMiddleware(jwtKey), requireAdminMiddleware("Only admins may create users."))
-	group.GET("/user", getUsersResource(userService), metricsHandler("get_users"), authorizationMiddleware(jwtKey))
-	group.GET("/user/:userid", getUserResource(userService), metricsHandler("get_user"), authorizationMiddleware(jwtKey))
-	group.PUT("/user/:userid", updateUserResource(userService), metricsHandler("update_user"), authorizationMiddleware(jwtKey))
-	group.DELETE("/user/:userid", deleteUserResource(userService), metricsHandler("delete_user"), authorizationMiddleware(jwtKey), requireAdminMiddleware("Only admins may delete users."))
-	//group.PUT("/user/:userid/password", updateUserPasswordResource(userService), metricsHandler("update_user_password", authorizationMiddleware(jwtKey)))
+	group.Use(authorizationMiddleware(cfg.GetString(config.JwtKey)))
+	group.POST("", createUserResource(userService), metricsHandler("post_user"), requireAdminMiddleware("Only admins may create users."))
+	group.GET("", getUsersResource(userService), metricsHandler("get_users"))
+	group.GET("/:userid", getUserResource(userService), metricsHandler("get_user"))
+	group.PUT("/:userid", updateUserResource(userService), metricsHandler("update_user"))
+	group.DELETE("/:userid", deleteUserResource(userService), metricsHandler("delete_user"), requireAdminMiddleware("Only admins may delete users."))
+	group.PUT("/:userid/password", updateUserPasswordResource(userService), metricsHandler("update_user_password"))
 }
 
 func createUserResource(s *service.UserService) echo.HandlerFunc {
@@ -108,6 +109,31 @@ func deleteUserResource(s *service.UserService) echo.HandlerFunc {
 			return err
 		}
 
-		return newStatus(http.StatusNoContent)
+		c.Response().WriteHeader(http.StatusNoContent)
+		return nil
+	}
+}
+
+func updateUserPasswordResource(userService *service.UserService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId := c.Param("userid")
+		authUser := c.Get("user").(*jwt.Token).Claims["sub"].(string)
+		isAdmin := c.Get("user").(*jwt.Token).Claims["isAdmin"].(bool)
+
+		passwordReset := new(model.PasswordReset)
+		if err := c.Bind(passwordReset); err != nil {
+			return newStatusWithMessage(http.StatusBadRequest, err.Error())
+		}
+
+		if authUser != userId && !isAdmin {
+			return newStatusWithMessage(http.StatusForbidden, "Only admins may set other user's passwords.")
+		}
+
+		if err := userService.UpdateUserPassword(userId, passwordReset, isAdmin); err != nil {
+			return newStatusWithMessage(http.StatusBadRequest, "Password reset failed.")
+		}
+
+		c.Response().WriteHeader(http.StatusNoContent)
+		return nil
 	}
 }

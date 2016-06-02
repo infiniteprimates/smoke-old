@@ -9,13 +9,13 @@ import (
 )
 
 type UserService struct {
-	userDb          *db.UserDb
+	userDb      *db.UserDb
 	authService *AuthService
 }
 
-//TODO: WTH userDb!?!?!
 func NewUserService(userDb *db.UserDb, authService *AuthService) (*UserService, error) {
 	return &UserService{
+		userDb:      userDb,
 		authService: authService,
 	}, nil
 }
@@ -70,12 +70,18 @@ func (s *UserService) Delete(userId string) error {
 	return s.userDb.Delete(userId)
 }
 
-func (s *UserService) UpdateUserPassword(userId string, password string) error {
-	if len(strings.TrimSpace(password)) == 0 {
+func (s *UserService) UpdateUserPassword(userId string, passwordReset *model.PasswordReset, administrativeReset bool) error {
+	if len(strings.TrimSpace(passwordReset.NewPassword)) == 0 {
 		return errors.New("Empty password is not acceptable.")
 	}
 
-	hashedPassword, err := s.authService.hashPassword(password)
+	if !administrativeReset {
+		if _, err := s.authService.AuthenticateUser(userId, passwordReset.OldPassword); err != nil {
+			return err
+		}
+	}
+
+	hashedPassword, err := s.authService.hashPassword(passwordReset.NewPassword)
 	if err != nil {
 		return err
 	}

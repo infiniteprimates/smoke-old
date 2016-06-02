@@ -19,6 +19,24 @@ type (
 		port uint16
 	}
 
+	router interface {
+		Any(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		File(path string, file string)
+		Group(path string, m ...echo.MiddlewareFunc) *echo.Group
+		Match(methods []string, path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		Static(prefix string, root string)
+		Use(m ...echo.MiddlewareFunc)
+		CONNECT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		DELETE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		GET(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		HEAD(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		OPTIONS(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		PATCH(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		POST(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		PUT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		TRACE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+	}
+
 	Server interface {
 		Start()
 	}
@@ -70,10 +88,10 @@ func New(logWriter io.Writer, cfg *config.Config, userService *service.UserServi
 	return server, nil
 }
 
-func createResources(e *echo.Echo, cfg *config.Config, userService *service.UserService, authService *service.AuthService) {
-	g := e.Group("/api")
-	createAuthResources(g, authService)
-	createUserResources(g, cfg, userService)
+func createResources(r router, cfg *config.Config, userService *service.UserService, authService *service.AuthService) {
+	group := r.Group("/api")
+	createAuthResources(group, authService)
+	createUserResources(group, cfg, userService)
 }
 
 func (server *server) Start() {

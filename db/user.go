@@ -5,34 +5,36 @@ import (
 )
 
 type (
-	UserDb struct{}
-
 	User struct {
-		Username string
+		Username     string
 		PasswordHash string
-		IsAdmin  bool
+		IsAdmin      bool
+	}
+
+	UserDb struct {
+		//TODO: Yes, I know the map isn't threadsafe. It's temporary.
+		users map[string]User
 	}
 )
 
-//TODO: Yes, I know the map isn't threadsafe. It's temporary.
-var users = map[string]User{}
-
 func NewUserDb(cfg *config.Config) (*UserDb, error) {
-	return &UserDb{}, nil
+	return &UserDb{
+		users: map[string]User{},
+	}, nil
 }
 
 func (db *UserDb) Create(user *User) (*User, error) {
-	if _, present := users[user.Username]; present {
+	if _, present := db.users[user.Username]; present {
 		return nil, NewDbError(EntityExists, "User '%s' already exists", user.Username)
 	}
 
-	users[user.Username] = *user
+	db.users[user.Username] = *user
 
 	return user, nil
 }
 
 func (db *UserDb) Find(userId string) (*User, error) {
-	userEntity, present := users[userId]
+	userEntity, present := db.users[userId]
 	if !present {
 		return nil, NewDbError(EntityNotFound, "User '%s' not found.", userId)
 	}
@@ -41,9 +43,9 @@ func (db *UserDb) Find(userId string) (*User, error) {
 }
 
 func (db *UserDb) List() ([]*User, error) {
-	userList := make([]*User, len(users), len(users))
+	userList := make([]*User, len(db.users), len(db.users))
 	i := 0
-	for _, user := range users {
+	for _, user := range db.users {
 		//TODO: Temp can be removed when this is a real database. It's needed to force a copy for now.
 		temp := user
 		userList[i] = &temp
@@ -54,28 +56,30 @@ func (db *UserDb) List() ([]*User, error) {
 
 func (db *UserDb) Update(user *User) (*User, error) {
 	//TODO: This is a poor mans update keeping the password hash intact.
-	if origUser, present := users[user.Username]; !present {
+	origUser, present := db.users[user.Username]
+	if !present {
 		return nil, NewDbError(EntityNotFound, "User '%s' not found.", user.Username)
-	} else {
-		user.PasswordHash = origUser.PasswordHash
 	}
 
-	users[user.Username] = *user
+	user.PasswordHash = origUser.PasswordHash
+
+	db.users[user.Username] = *user
 	return user, nil
 }
 
 func (db *UserDb) Delete(userId string) error {
-	delete(users, userId)
+	delete(db.users, userId)
 	return nil
 }
 
 func (db *UserDb) UpdateUserPassword(userId string, passwordhash string) error {
-	if user, present := users[userId]; !present {
+	user, present := db.users[userId]
+	if !present {
 		return NewDbError(EntityNotFound, "User '%s' not found.", userId)
-	} else {
-		user.PasswordHash = passwordhash
-		users[userId] = user
 	}
+
+	user.PasswordHash = passwordhash
+	db.users[userId] = user
 
 	return nil
 }

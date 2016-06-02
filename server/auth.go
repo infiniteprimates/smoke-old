@@ -16,8 +16,8 @@ type (
 	}
 )
 
-func createAuthResources(group *echo.Group, authService *service.AuthService) {
-	group.POST("/auth", postAuthorizationResource(authService), metricsHandler("get_auth"), basicAuthExtractor())
+func createAuthResources(r router, authService *service.AuthService) {
+	r.POST("/auth", postAuthorizationResource(authService), metricsHandler("get_auth"), basicAuthExtractor())
 }
 
 func postAuthorizationResource(authService *service.AuthService) echo.HandlerFunc {

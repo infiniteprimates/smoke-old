@@ -11,25 +11,25 @@ import (
 )
 
 type (
-	AuthService struct{
-		cfg *config.Config
+	AuthService struct {
+		cfg    *config.Config
 		userDb *db.UserDb
 	}
 )
 
 const (
-	Issuer       = "Smoke"
+	Issuer = "Smoke"
 )
 
 func NewAuthService(cfg *config.Config, userDb *db.UserDb) *AuthService {
 	return &AuthService{
-		cfg: cfg,
+		cfg:    cfg,
 		userDb: userDb,
 	}
 }
 
 func (s *AuthService) AuthenticateUser(username string, password string) (string, error) {
-	user, err := s.userDb.Find(username);
+	user, err := s.userDb.Find(username)
 	if err != nil {
 		// hash the password so this takes time like a validation
 		_, _ = s.hashPassword(password)
@@ -62,4 +62,3 @@ func (s *AuthService) generateJwt(user *db.User) (string, error) {
 
 	return token.SignedString([]byte(s.cfg.GetString(config.JwtKey)))
 }
-
