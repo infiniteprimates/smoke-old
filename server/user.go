@@ -1,21 +1,25 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/model"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 )
 
-func createUserResources(userService *service.UserService, group *echo.Group) {
-	group.POST("/user", createUserResource(userService), metricsHandler("post_user"), authorizationMiddleware(), requireAdminMiddleware("Only admins may create users."))
-	group.GET("/user", getUsersResource(userService), metricsHandler("get_users"), authorizationMiddleware())
-	group.GET("/user/:userid", getUserResource(userService), metricsHandler("get_user"), authorizationMiddleware())
-	group.PUT("/user/:userid", updateUserResource(userService), metricsHandler("update_user"), authorizationMiddleware())
-	group.DELETE("/user/:userid", deleteUserResource(userService), metricsHandler("delete_user"), authorizationMiddleware(), requireAdminMiddleware("Only admins may delete users."))
+func createUserResources(r router, cfg *config.Config, userService *service.UserService) {
+	group := r.Group("/users")
+
+	group.Use(authorizationMiddleware(cfg.GetString(config.JwtKey)))
+	group.POST("", createUserResource(userService), metricsHandler("post_user"), requireAdminMiddleware("Only admins may create users."))
+	group.GET("", getUsersResource(userService), metricsHandler("get_users"))
+	group.GET("/:userid", getUserResource(userService), metricsHandler("get_user"))
+	group.PUT("/:userid", updateUserResource(userService), metricsHandler("update_user"))
+	group.DELETE("/:userid", deleteUserResource(userService), metricsHandler("delete_user"), requireAdminMiddleware("Only admins may delete users."))
+	group.PUT("/:userid/password", updateUserPasswordResource(userService), metricsHandler("update_user_password"))
 }
 
 func createUserResource(s *service.UserService) echo.HandlerFunc {
@@ -38,7 +42,7 @@ func createUserResource(s *service.UserService) echo.HandlerFunc {
 func getUserResource(s *service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
-		user, err := s.Find(userId, false)
+		user, err := s.Find(userId)
 		if err != nil {
 			return newStatus(404)
 		}
@@ -70,7 +74,7 @@ func updateUserResource(s *service.UserService) echo.HandlerFunc {
 		}
 
 		if user.Username != userId {
-			return newStatusWithMessage(http.StatusBadRequest, fmt.Sprintf("Url userId '%s' and json userId '%s' are mismatched.", userId, user.Username))
+			return newStatusWithMessage(http.StatusBadRequest, "Url userId '%s' and json userId '%s' are mismatched.", userId, user.Username)
 		}
 
 		if authUser != userId && !isAdmin {
@@ -79,6 +83,10 @@ func updateUserResource(s *service.UserService) echo.HandlerFunc {
 
 		if !isAdmin && user.IsAdmin {
 			return newStatusWithMessage(http.StatusForbidden, "Only admins may make other users admins.")
+		}
+
+		if isAdmin && !user.IsAdmin && authUser == user.Username {
+			return newStatusWithMessage(http.StatusBadRequest, "For your own safety, I'm not going to allow you to remove admin privileges from yourself.")
 		}
 
 		user, err := s.Update(user)
@@ -101,6 +109,31 @@ func deleteUserResource(s *service.UserService) echo.HandlerFunc {
 			return err
 		}
 
-		return newStatus(http.StatusNoContent)
+		c.Response().WriteHeader(http.StatusNoContent)
+		return nil
+	}
+}
+
+func updateUserPasswordResource(userService *service.UserService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId := c.Param("userid")
+		authUser := c.Get("user").(*jwt.Token).Claims["sub"].(string)
+		isAdmin := c.Get("user").(*jwt.Token).Claims["isAdmin"].(bool)
+
+		passwordReset := new(model.PasswordReset)
+		if err := c.Bind(passwordReset); err != nil {
+			return newStatusWithMessage(http.StatusBadRequest, err.Error())
+		}
+
+		if authUser != userId && !isAdmin {
+			return newStatusWithMessage(http.StatusForbidden, "Only admins may set other user's passwords.")
+		}
+
+		if err := userService.UpdateUserPassword(userId, passwordReset, isAdmin); err != nil {
+			return newStatusWithMessage(http.StatusBadRequest, "Password reset failed.")
+		}
+
+		c.Response().WriteHeader(http.StatusNoContent)
+		return nil
 	}
 }

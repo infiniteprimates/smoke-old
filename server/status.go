@@ -25,10 +25,10 @@ func newStatus(code int) error {
 	return newStatusWithMessage(code, statusMessages[code])
 }
 
-func newStatusWithMessage(code int, msg string) error {
+func newStatusWithMessage(code int, format string, args ...interface{}) error {
 	return &smokeStatus{
 		Code:    code,
-		Message: msg,
+		Message: fmt.Sprintf(format, args...),
 	}
 }
 
@@ -38,6 +38,15 @@ func smokeErrorHandler(e *echo.Echo) echo.HTTPErrorHandler {
 		if status, ok := err.(*smokeStatus); ok {
 			if status.Code == http.StatusUnauthorized {
 				c.Response().Header().Set(echo.HeaderWWWAuthenticate, "Basic realm=\"Smoke\"")
+			}
+
+			if !c.Response().Committed() {
+				c.JSON(status.Code, status)
+			}
+		} else if httpError, ok := err.(*echo.HTTPError); ok {
+			status := &smokeStatus{
+				Code:    httpError.Code,
+				Message: httpError.Message,
 			}
 
 			if !c.Response().Committed() {

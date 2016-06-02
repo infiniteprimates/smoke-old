@@ -9,41 +9,35 @@ import (
 )
 
 type UserService struct {
-	userDb          *db.UserDb
-	passwordService *PasswordService
+	userDb      *db.UserDb
+	authService *AuthService
 }
 
-func NewUserService(userDb *db.UserDb, passwordService *PasswordService) (*UserService, error) {
+func NewUserService(userDb *db.UserDb, authService *AuthService) (*UserService, error) {
 	return &UserService{
-		passwordService: passwordService,
+		userDb:      userDb,
+		authService: authService,
 	}, nil
 }
 
 func (s *UserService) Create(userModel *model.User) (*model.User, error) {
-	if len(strings.TrimSpace(userModel.Password)) == 0 {
-		return nil, errors.New("User password is not acceptable")
-	}
+	userEntity := s.userModelToEntity(userModel)
 
-	userEntity, err := s.userModelToEntity(userModel)
+	userEntity, err := s.userDb.Create(userEntity)
 	if err != nil {
 		return nil, err
 	}
 
-	userEntity, err = s.userDb.Create(userEntity)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.userEntityToModel(userEntity, false), nil
+	return s.userEntityToModel(userEntity), nil
 }
 
-func (s *UserService) Find(userId string, withPassword bool) (*model.User, error) {
+func (s *UserService) Find(userId string) (*model.User, error) {
 	userEntity, err := s.userDb.Find(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.userEntityToModel(userEntity, withPassword), nil
+	return s.userEntityToModel(userEntity), nil
 }
 
 func (s *UserService) List() ([]*model.User, error) {
@@ -55,67 +49,60 @@ func (s *UserService) List() ([]*model.User, error) {
 	userList := make([]*model.User, len(userEntityList), len(userEntityList))
 
 	for i, userEntity := range userEntityList {
-		userList[i] = s.userEntityToModel(userEntity, false)
+		userList[i] = s.userEntityToModel(userEntity)
 	}
 
 	return userList, nil
 }
 
 func (s *UserService) Update(userModel *model.User) (*model.User, error) {
-	userEntity, err := s.userDb.Find(userModel.Username)
+	userEntity := s.userModelToEntity(userModel)
+
+	userEntity, err := s.userDb.Update(userEntity)
 	if err != nil {
 		return nil, err
 	}
 
-	userEntityFromModel, err := s.userModelToEntity(userModel)
-	if err != nil {
-		return nil, err
-	}
-
-	userEntity.IsAdmin = userEntityFromModel.IsAdmin
-	if len(strings.TrimSpace(userEntityFromModel.Password)) > 0 {
-		userEntity.Password = userEntityFromModel.Password
-	}
-
-	userEntity, err = s.userDb.Update(userEntity)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.userEntityToModel(userEntity, false), nil
+	return s.userEntityToModel(userEntity), nil
 }
 
 func (s *UserService) Delete(userId string) error {
 	return s.userDb.Delete(userId)
 }
 
-func (s *UserService) userEntityToModel(userEntity *db.User, withPassword bool) *model.User {
+func (s *UserService) UpdateUserPassword(userId string, passwordReset *model.PasswordReset, administrativeReset bool) error {
+	if len(strings.TrimSpace(passwordReset.NewPassword)) == 0 {
+		return errors.New("Empty password is not acceptable.")
+	}
+
+	if !administrativeReset {
+		if _, err := s.authService.AuthenticateUser(userId, passwordReset.OldPassword); err != nil {
+			return err
+		}
+	}
+
+	hashedPassword, err := s.authService.hashPassword(passwordReset.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	return s.userDb.UpdateUserPassword(userId, hashedPassword)
+}
+
+func (s *UserService) userEntityToModel(userEntity *db.User) *model.User {
 	userModel := &model.User{
 		Username: userEntity.Username,
 		IsAdmin:  userEntity.IsAdmin,
 	}
 
-	if withPassword {
-		userModel.Password = userEntity.Password
-	}
-
 	return userModel
 }
 
-func (s *UserService) userModelToEntity(userModel *model.User) (*db.User, error) {
+func (s *UserService) userModelToEntity(userModel *model.User) *db.User {
 	userEntity := &db.User{
 		Username: userModel.Username,
 		IsAdmin:  userModel.IsAdmin,
 	}
 
-	if len(strings.TrimSpace(userModel.Password)) > 0 {
-		hashedPassword, err := s.passwordService.HashPassword(userModel.Password)
-		if err != nil {
-			return nil, err
-		}
-
-		userEntity.Password = hashedPassword
-	}
-
-	return userEntity, nil
+	return userEntity
 }

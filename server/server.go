@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/fasthttp"
 	"github.com/labstack/echo/middleware"
-	"github.com/spf13/viper"
 )
 
 type (
@@ -20,12 +19,30 @@ type (
 		port uint16
 	}
 
+	router interface {
+		Any(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		File(path string, file string)
+		Group(path string, m ...echo.MiddlewareFunc) *echo.Group
+		Match(methods []string, path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		Static(prefix string, root string)
+		Use(m ...echo.MiddlewareFunc)
+		CONNECT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		DELETE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		GET(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		HEAD(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		OPTIONS(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		PATCH(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		POST(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		PUT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+		TRACE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc)
+	}
+
 	Server interface {
 		Start()
 	}
 )
 
-func New(logWriter io.Writer, cfg *viper.Viper, userService *service.UserService, passwordService *service.PasswordService) (Server, error) {
+func New(logWriter io.Writer, cfg *config.Config, userService *service.UserService, authService *service.AuthService) (Server, error) {
 	e := echo.New()
 
 	e.SetHTTPErrorHandler(smokeErrorHandler(e))
@@ -50,7 +67,7 @@ func New(logWriter io.Writer, cfg *viper.Viper, userService *service.UserService
 	root := cfg.GetString(config.UiRoot)
 	e.Use(middleware.Static(root))
 
-	createResources(userService, passwordService, e)
+	createResources(e, cfg, userService, authService)
 
 	ip := cfg.GetString(config.Ip)
 	if net.ParseIP(ip) == nil {
@@ -71,10 +88,10 @@ func New(logWriter io.Writer, cfg *viper.Viper, userService *service.UserService
 	return server, nil
 }
 
-func createResources(userService *service.UserService, passwordService *service.PasswordService, e *echo.Echo) {
-	g := e.Group("/api")
-	createAuthResources(userService, passwordService, g)
-	createUserResources(userService, g)
+func createResources(r router, cfg *config.Config, userService *service.UserService, authService *service.AuthService) {
+	group := r.Group("/api")
+	createAuthResources(group, authService)
+	createUserResources(group, cfg, userService)
 }
 
 func (server *server) Start() {

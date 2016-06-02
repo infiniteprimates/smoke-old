@@ -1,7 +1,13 @@
 package model
 
-type User struct {
-	Username string `json:"username"`
-	Password string `json:"password,omitempty"`
-	IsAdmin  bool   `json:"isAdmin"`
-}
+type (
+	User struct {
+		Username string `json:"username"`
+		IsAdmin  bool   `json:"isAdmin"`
+	}
+
+	PasswordReset struct {
+		OldPassword string `json:"oldPassword"`
+		NewPassword string `json:"newPassword"`
+	}
+)
