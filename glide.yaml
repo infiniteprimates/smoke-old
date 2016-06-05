@@ -10,3 +10,4 @@ import:
   - bcrypt
 - package: github.com/spf13/viper
 - package: github.com/labstack/echo
+- package: gopkg.in/stretchr/testify.v1

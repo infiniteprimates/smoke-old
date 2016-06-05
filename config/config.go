@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -14,6 +13,8 @@ type (
 )
 
 const (
+	EnvPrefix = "smoke"
+
 	Debug                  = "debug"
 	DevCors                = "dev_cors"
 	Ip                     = "ip"
@@ -21,26 +22,26 @@ const (
 	MetricsLoggingInterval = "metrics_logging_interval"
 	Port                   = "port"
 	UiRoot                 = "ui_root"
-)
 
-var (
-	config *Config
-	once   sync.Once
+	defaultDebug                  = true
+	defaultDevCors                = false
+	defaultIp                     = "0.0.0.0"
+	defaultMetricsLoggingInterval = 5
+	defaultPort                   = 80
+	defaultUiRoot                 = "dist"
 )
 
 func GetConfig() (*Config, error) {
-	once.Do(func() {
-		viperConfig := viper.New()
+	viperConfig := viper.New()
 
-		config = &Config{
-			Viper: viperConfig,
-		}
+	config := &Config{
+		Viper: viperConfig,
+	}
 
-		config.AutomaticEnv()
-		config.SetEnvPrefix("smoke")
+	config.AutomaticEnv()
+	config.SetEnvPrefix(EnvPrefix)
 
-		setDefaults(config)
-	})
+	setDefaults(config)
 
 	if err := validateConfig(config); err != nil {
 		return nil, err
@@ -50,18 +51,25 @@ func GetConfig() (*Config, error) {
 }
 
 func setDefaults(config *Config) {
-	config.SetDefault(Debug, false)
-	config.SetDefault(DevCors, false)
-	config.SetDefault(Ip, "0.0.0.0")
-	config.SetDefault(MetricsLoggingInterval, 5)
-	config.SetDefault(Port, 8080)
-	config.SetDefault(UiRoot, "dist")
+	config.SetDefault(Debug, defaultDebug)
+	config.SetDefault(DevCors, defaultDevCors)
+	config.SetDefault(Ip, defaultIp)
+	config.SetDefault(MetricsLoggingInterval, defaultMetricsLoggingInterval)
+	config.SetDefault(Port, defaultPort)
+	config.SetDefault(UiRoot, defaultUiRoot)
 }
 
 func validateConfig(config *Config) error {
+	var err error
+	errMsg := ""
+
 	if !config.IsSet(JwtKey) {
-		return fmt.Errorf("Configuration '%s' is required.", JwtKey)
+		errMsg += fmt.Sprintf("Configuration '%s' is required. ", JwtKey)
 	}
 
-	return nil
+	if len(errMsg) > 0 {
+		err = fmt.Errorf(errMsg)
+	}
+
+	return err
 }

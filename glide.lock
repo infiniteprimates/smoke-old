@@ -1,5 +1,5 @@
-hash: 80b4c3eefce1a1766633f096a0e5c27d23028138f6e3b765246bcf046c86409d
-updated: 2016-05-31T23:12:56.378502131-06:00
+hash: aafca08276cb6d2810b76f40d7f7dd220294e1e7e2c73a99743b9af21963b054
+updated: 2016-06-05T12:09:40.025493746-06:00
 imports:
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
@@ -29,7 +29,7 @@ imports:
 - name: github.com/klauspost/crc32
   version: 19b0b332c9e4516a6370a0456e6182c3b5036720
 - name: github.com/labstack/echo
-  version: 0d2dac7532e61dc64c14039c629e82c7f2c1b6f6
+  version: 74c8e254ff8400a7b5c0940c85daca5d0af038ff
   subpackages:
   - engine/fasthttp
   - middleware
@@ -44,7 +44,7 @@ imports:
 - name: github.com/magiconair/properties
   version: c265cfa48dda6474e208715ca93e987829f572f8
 - name: github.com/mattn/go-colorable
-  version: e8a10ddc7d2a7fe255f6fd7f501070a4cb62c183
+  version: 9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59
 - name: github.com/mattn/go-isatty
   version: 56b76bdf51f7708750eac80fa38b952bb9f32639
 - name: github.com/mitchellh/mapstructure
@@ -52,7 +52,7 @@ imports:
 - name: github.com/rcrowley/go-metrics
   version: eeba7bd0dd01ace6e690fa833b3f22aaec29af43
 - name: github.com/Sirupsen/logrus
-  version: 6d9ae300aaf85d6acd2e5424081c7fcddb21dab8
+  version: f3cfb454f4c209e6668c95216c4744b8fddb2356
 - name: github.com/spf13/cast
   version: 27b586b42e29bec072fe7379259cc719e1289da6
 - name: github.com/spf13/jwalterweatherman
@@ -62,7 +62,7 @@ imports:
 - name: github.com/spf13/viper
   version: d8a428b8a30606e1d0b355d91edf282609ade1a6
 - name: github.com/valyala/fasthttp
-  version: 03bef793b795628a457ad41e27f3105f224ae3b5
+  version: 90baa054bca117a5d6c7e1fd338a3d6a5fe39bee
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - name: golang.org/x/crypto
@@ -75,9 +75,11 @@ imports:
   subpackages:
   - context
 - name: golang.org/x/sys
-  version: d4feaf1a7e61e1d9e79e6c4e76c6349e9cab0a03
+  version: 076b546753157f758b316e59bcb51e6807c04057
   subpackages:
   - unix
+- name: gopkg.in/stretchr/testify.v1
+  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 devImports: []
