@@ -42,7 +42,7 @@ type (
 	}
 )
 
-func New(logWriter io.Writer, cfg *config.Config, userService *service.UserService, authService *service.AuthService) (Server, error) {
+func New(logWriter io.Writer, cfg config.Config, userService service.UserService, authService service.AuthService) (Server, error) {
 	e := echo.New()
 
 	e.SetHTTPErrorHandler(smokeErrorHandler(e))
@@ -88,7 +88,7 @@ func New(logWriter io.Writer, cfg *config.Config, userService *service.UserServi
 	return server, nil
 }
 
-func createResources(r router, cfg *config.Config, userService *service.UserService, authService *service.AuthService) {
+func createResources(r router, cfg config.Config, userService service.UserService, authService service.AuthService) {
 	group := r.Group("/api")
 	createAuthResources(group, authService)
 	createUserResources(group, cfg, userService)

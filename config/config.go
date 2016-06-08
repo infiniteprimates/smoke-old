@@ -7,8 +7,11 @@ import (
 )
 
 type (
-	Config struct {
-		*viper.Viper
+	Config interface {
+		AllSettings() map[string]interface{}
+		GetBool(string) bool
+		GetInt(string) int
+		GetString(string) string
 	}
 )
 
@@ -27,16 +30,12 @@ const (
 	defaultDevCors                = false
 	defaultIp                     = "0.0.0.0"
 	defaultMetricsLoggingInterval = 5
-	defaultPort                   = 80
+	defaultPort                   = 8080
 	defaultUiRoot                 = "dist"
 )
 
-func GetConfig() (*Config, error) {
-	viperConfig := viper.New()
-
-	config := &Config{
-		Viper: viperConfig,
-	}
+func GetConfig() (Config, error) {
+	config := viper.New()
 
 	config.AutomaticEnv()
 	config.SetEnvPrefix(EnvPrefix)
@@ -50,7 +49,7 @@ func GetConfig() (*Config, error) {
 	return config, nil
 }
 
-func setDefaults(config *Config) {
+func setDefaults(config *viper.Viper) {
 	config.SetDefault(Debug, defaultDebug)
 	config.SetDefault(DevCors, defaultDevCors)
 	config.SetDefault(Ip, defaultIp)
@@ -59,7 +58,7 @@ func setDefaults(config *Config) {
 	config.SetDefault(UiRoot, defaultUiRoot)
 }
 
-func validateConfig(config *Config) error {
+func validateConfig(config *viper.Viper) error {
 	var err error
 	errMsg := ""
 

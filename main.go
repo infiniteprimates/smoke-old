@@ -51,13 +51,13 @@ func fatalIfErr(logger *logrus.Logger, err error) {
 	}
 }
 
-func startMetricsLogging(cfg *config.Config, logWriter io.Writer) {
+func startMetricsLogging(cfg config.Config, logWriter io.Writer) {
 	// Start background metrics logger
 	metricsLoggingInterval := time.Duration(cfg.GetInt(config.MetricsLoggingInterval)) * time.Minute
 	go metrics.Log(metrics.DefaultRegistry, metricsLoggingInterval, log.New(logWriter, "metrics", log.Lmicroseconds))
 }
 
-func initAccounts(userService *service.UserService) {
+func initAccounts(userService service.UserService) {
 	// This is temporary code until we have a real DB and an admin bootstrapping process
 	userService.Create(&model.User{
 		Username: "admin",

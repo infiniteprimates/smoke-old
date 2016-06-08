@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-func createUserResources(r router, cfg *config.Config, userService *service.UserService) {
+func createUserResources(r router, cfg config.Config, userService service.UserService) {
 	group := r.Group("/users")
 
 	group.Use(authorizationMiddleware(cfg.GetString(config.JwtKey)))
@@ -22,7 +22,7 @@ func createUserResources(r router, cfg *config.Config, userService *service.User
 	group.PUT("/:userid/password", updateUserPasswordResource(userService), metricsHandler("update_user_password"))
 }
 
-func createUserResource(s *service.UserService) echo.HandlerFunc {
+func createUserResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user := new(model.User)
 
@@ -39,7 +39,7 @@ func createUserResource(s *service.UserService) echo.HandlerFunc {
 	}
 }
 
-func getUserResource(s *service.UserService) echo.HandlerFunc {
+func getUserResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
 		user, err := s.Find(userId)
@@ -51,7 +51,7 @@ func getUserResource(s *service.UserService) echo.HandlerFunc {
 	}
 }
 
-func getUsersResource(s *service.UserService) echo.HandlerFunc {
+func getUsersResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		users, err := s.List()
 		if err != nil {
@@ -62,7 +62,7 @@ func getUsersResource(s *service.UserService) echo.HandlerFunc {
 	}
 }
 
-func updateUserResource(s *service.UserService) echo.HandlerFunc {
+func updateUserResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
 		authUser := c.Get("user").(*jwt.Token).Claims["sub"].(string)
@@ -98,7 +98,7 @@ func updateUserResource(s *service.UserService) echo.HandlerFunc {
 	}
 }
 
-func deleteUserResource(s *service.UserService) echo.HandlerFunc {
+func deleteUserResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
 		if authUser := c.Get("user").(*jwt.Token).Claims["sub"]; authUser == userId {
@@ -114,7 +114,7 @@ func deleteUserResource(s *service.UserService) echo.HandlerFunc {
 	}
 }
 
-func updateUserPasswordResource(userService *service.UserService) echo.HandlerFunc {
+func updateUserPasswordResource(userService service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
 		authUser := c.Get("user").(*jwt.Token).Claims["sub"].(string)

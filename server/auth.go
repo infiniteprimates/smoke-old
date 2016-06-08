@@ -16,11 +16,11 @@ type (
 	}
 )
 
-func createAuthResources(r router, authService *service.AuthService) {
+func createAuthResources(r router, authService service.AuthService) {
 	r.POST("/auth", postAuthorizationResource(authService), metricsHandler("get_auth"), basicAuthExtractor())
 }
 
-func postAuthorizationResource(authService *service.AuthService) echo.HandlerFunc {
+func postAuthorizationResource(authService service.AuthService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		username := c.Get("username").(string)
 		password := c.Get("password").(string)
