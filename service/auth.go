@@ -12,9 +12,8 @@ import (
 
 type (
 	AuthService interface {
-		AuthenticateUser(string, string) (string, error)
-		hashPassword(string) (string, error)
-		validatePassword(string, string) bool
+		AuthenticateUser(username string, password string) (string, error)
+		hashPassword(password string) (string, error)
 	}
 
 	authService struct {
@@ -63,6 +62,7 @@ func (s *authService) generateJwt(user *db.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["iss"] = Issuer
 	token.Claims["sub"] = user.Username
+	//TODO: Configurable expiration
 	token.Claims["exp"] = time.Now().Add(1 * time.Hour).Unix()
 	token.Claims["isAdmin"] = user.IsAdmin
 

@@ -12,12 +12,12 @@ type (
 	}
 
 	UserDb interface {
-		Create(*User) (*User, error)
-		Find(string) (*User, error)
+		Create(user *User) (*User, error)
+		Find(username string) (*User, error)
 		List() ([]*User, error)
-		Update(*User) (*User, error)
-		Delete(string) error
-		UpdateUserPassword(string, string) error
+		Update(user *User) (*User, error)
+		Delete(username string) error
+		UpdateUserPassword(username string, password string) error
 	}
 
 	userDb struct {

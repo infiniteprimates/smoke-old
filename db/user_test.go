@@ -3,12 +3,12 @@ package db
 import (
 	"testing"
 
-	"github.com/infiniteprimates/smoke/mocks"
+	"github.com/infiniteprimates/smoke/mocks/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUserDb_Create_Success(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -23,7 +23,7 @@ func TestUserDb_Create_Success(t *testing.T) {
 }
 
 func TestUserDb_Create_AlreadyExists(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -42,7 +42,7 @@ func TestUserDb_Create_AlreadyExists(t *testing.T) {
 }
 
 func TestUserDb_Find_Success(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -57,7 +57,7 @@ func TestUserDb_Find_Success(t *testing.T) {
 }
 
 func TestUserDb_Find_NotFound(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -76,7 +76,7 @@ func TestUserDb_Find_NotFound(t *testing.T) {
 }
 
 func TestUserDb_List_Success(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	admin := User {
 		Username: "admin",
 	}
@@ -96,7 +96,7 @@ func TestUserDb_List_Success(t *testing.T) {
 }
 
 func TestUserDb_Update_Exists(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -111,7 +111,7 @@ func TestUserDb_Update_Exists(t *testing.T) {
 }
 
 func TestUserDb_Update_NotExists(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -131,7 +131,7 @@ func TestUserDb_Update_NotExists(t *testing.T) {
 }
 
 func TestUserDb_Delete_Exists(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -144,7 +144,7 @@ func TestUserDb_Delete_Exists(t *testing.T) {
 }
 
 func TestUserDb_Delete_NotExists(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	db, err := NewUserDb(cfg)
 	db.(*userDb).users = map[string]User{}
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
@@ -154,7 +154,7 @@ func TestUserDb_Delete_NotExists(t *testing.T) {
 }
 
 func TestUserDb_UpdateUserPassword_Exists(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	user := User {
 		Username: "user",
 	}
@@ -167,7 +167,7 @@ func TestUserDb_UpdateUserPassword_Exists(t *testing.T) {
 }
 
 func TestUserDb_UpdateUserPassword_NotExists(t *testing.T) {
-	cfg := new(mocks.ConfigMock)
+	cfg := new(config.ConfigMock)
 	db, err := NewUserDb(cfg)
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
 		db.(*userDb).users = map[string]User{}

@@ -9,9 +9,9 @@ import (
 type (
 	Config interface {
 		AllSettings() map[string]interface{}
-		GetBool(string) bool
-		GetInt(string) int
-		GetString(string) string
+		GetBool(key string) bool
+		GetInt(key string) int
+		GetString(key string) string
 	}
 )
 

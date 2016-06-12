@@ -11,11 +11,11 @@ import (
 type (
 	UserService interface {
 		Create(userModel *model.User) (*model.User, error)
-		Find(string) (*model.User, error)
+		Find(username string) (*model.User, error)
 		List() ([]*model.User, error)
 		Update(userModel *model.User) (*model.User, error)
-		Delete(string) error
-		UpdateUserPassword(string, *model.PasswordReset, bool) error
+		Delete(username string) error
+		UpdateUserPassword(username string, passwordReset *model.PasswordReset, administrativeReset bool) error
 	}
 
 	userService struct {
@@ -24,10 +24,10 @@ type (
 	}
 )
 
-func NewUserService(userDb db.UserDb, authService AuthService) (UserService, error) {
+func NewUserService(userDb db.UserDb, authSvc AuthService) (UserService, error) {
 	return &userService{
 		userDb:      userDb,
-		authService: authService,
+		authService: authSvc,
 	}, nil
 }
 
@@ -100,7 +100,7 @@ func (s *userService) UpdateUserPassword(userId string, passwordReset *model.Pas
 	return s.userDb.UpdateUserPassword(userId, hashedPassword)
 }
 
-func (s *userService) userEntityToModel(userEntity *db.User) *model.User {
+func (_ *userService) userEntityToModel(userEntity *db.User) *model.User {
 	userModel := &model.User{
 		Username: userEntity.Username,
 		IsAdmin:  userEntity.IsAdmin,
@@ -109,7 +109,7 @@ func (s *userService) userEntityToModel(userEntity *db.User) *model.User {
 	return userModel
 }
 
-func (s *userService) userModelToEntity(userModel *model.User) *db.User {
+func (_ *userService) userModelToEntity(userModel *model.User) *db.User {
 	userEntity := &db.User{
 		Username: userModel.Username,
 		IsAdmin:  userModel.IsAdmin,
