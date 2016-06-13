@@ -33,8 +33,7 @@ func main() {
 
 	authService := service.NewAuthService(cfg, userDb)
 
-	userService, err := service.NewUserService(userDb, authService)
-	fatalIfErr(logger, err)
+	userService := service.NewUserService(userDb, authService)
 
 	//TODO:temporary account creation during initial dev
 	initAccounts(userService)

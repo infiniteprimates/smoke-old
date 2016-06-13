@@ -24,11 +24,11 @@ type (
 	}
 )
 
-func NewUserService(userDb db.UserDb, authSvc AuthService) (UserService, error) {
+func NewUserService(userDb db.UserDb, authSvc AuthService) UserService {
 	return &userService{
 		userDb:      userDb,
 		authService: authSvc,
-	}, nil
+	}
 }
 
 func (s *userService) Create(userModel *model.User) (*model.User, error) {
@@ -92,7 +92,7 @@ func (s *userService) UpdateUserPassword(userId string, passwordReset *model.Pas
 		}
 	}
 
-	hashedPassword, err := s.authService.hashPassword(passwordReset.NewPassword)
+	hashedPassword, err := s.authService.HashPassword(passwordReset.NewPassword)
 	if err != nil {
 		return err
 	}

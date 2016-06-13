@@ -13,7 +13,7 @@ import (
 type (
 	AuthService interface {
 		AuthenticateUser(username string, password string) (string, error)
-		hashPassword(password string) (string, error)
+		HashPassword(password string) (string, error)
 	}
 
 	authService struct {
@@ -37,7 +37,7 @@ func (s *authService) AuthenticateUser(username string, password string) (string
 	user, err := s.userDb.Find(username)
 	if err != nil {
 		// hash the password so this takes time like a validation
-		_, _ = s.hashPassword(password)
+		_, _ = s.HashPassword(password)
 		return "", errors.New("Invalid credentials.")
 	}
 
@@ -48,7 +48,7 @@ func (s *authService) AuthenticateUser(username string, password string) (string
 	return s.generateJwt(user)
 }
 
-func (s *authService) hashPassword(password string) (string, error) {
+func (s *authService) HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hashedPassword), err
 }

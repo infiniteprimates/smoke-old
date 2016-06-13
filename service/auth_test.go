@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/infiniteprimates/smoke/config"
@@ -8,7 +9,6 @@ import (
 	mockcfg "github.com/infiniteprimates/smoke/mocks/config"
 	mockdb "github.com/infiniteprimates/smoke/mocks/db"
 	"github.com/stretchr/testify/assert"
-	"github.com/vektra/errors"
 )
 
 func TestAuthService_AuthenticateUser_Success(t *testing.T) {
@@ -18,7 +18,7 @@ func TestAuthService_AuthenticateUser_Success(t *testing.T) {
 	user := &db.User {
 		Username: "user",
 	}
-	if passwordHash, err := svc.hashPassword("password") ; !assert.NoError(t, err, "Password hashing failed.") {
+	if passwordHash, err := svc.HashPassword("password") ; !assert.NoError(t, err, "Password hashing failed.") {
 		return
 	} else {
 		user.PasswordHash = passwordHash
