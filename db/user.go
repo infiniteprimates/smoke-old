@@ -26,7 +26,7 @@ type (
 )
 
 //TODO: Yes, I know the map isn't threadsafe. It's temporary.
-var users map[string]User = map[string]User{}
+var users = map[string]User{}
 
 func NewUserDb(cfg config.Config) (UserDb, error) {
 	return &userDb{

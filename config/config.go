@@ -18,20 +18,20 @@ type (
 const (
 	EnvPrefix = "smoke"
 
-	Debug                  = "debug"
-	DevCors                = "dev_cors"
-	Ip                     = "ip"
-	JwtKey                 = "jwt_key"
-	MetricsLoggingInterval = "metrics_logging_interval"
-	Port                   = "port"
-	UiRoot                 = "ui_root"
+	Debug                     = "debug"
+	DevCors                   = "dev_cors"
+	Ip                        = "ip"
+	JwtKey                    = "jwt_key"
+	MetricsPublishingInterval = "metrics_publishing_interval"
+	Port                      = "port"
+	UiRoot                    = "ui_root"
 
-	defaultDebug                  = true
-	defaultDevCors                = false
-	defaultIp                     = "0.0.0.0"
-	defaultMetricsLoggingInterval = 5
-	defaultPort                   = 8080
-	defaultUiRoot                 = "dist"
+	defaultDebug                     = true
+	defaultDevCors                   = false
+	defaultIp                        = "0.0.0.0"
+	defaultMetricsPublishingInterval = 15
+	defaultPort                      = 8080
+	defaultUiRoot                    = "dist"
 )
 
 func GetConfig() (Config, error) {
@@ -53,7 +53,7 @@ func setDefaults(config *viper.Viper) {
 	config.SetDefault(Debug, defaultDebug)
 	config.SetDefault(DevCors, defaultDevCors)
 	config.SetDefault(Ip, defaultIp)
-	config.SetDefault(MetricsLoggingInterval, defaultMetricsLoggingInterval)
+	config.SetDefault(MetricsPublishingInterval, defaultMetricsPublishingInterval)
 	config.SetDefault(Port, defaultPort)
 	config.SetDefault(UiRoot, defaultUiRoot)
 }

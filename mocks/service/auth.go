@@ -2,7 +2,7 @@ package service
 
 import "github.com/stretchr/testify/mock"
 
-type(
+type (
 	AuthServiceMock struct {
 		mock.Mock
 	}

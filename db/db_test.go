@@ -10,7 +10,7 @@ func TestNewDbError(t *testing.T) {
 	err := newDbError(EntityNotFound, "%s", "Catastrophe")
 
 	if assert.NotNil(t, err, "Error was nil.") {
-		if dbErr, ok := err.(*dbError) ; !ok {
+		if dbErr, ok := err.(*dbError); !ok {
 			assert.True(t, ok, "Error was not a dbError.")
 		} else {
 			assert.Equal(t, dbErrorReason(EntityNotFound), dbErr.reason, "Reason did not match.")

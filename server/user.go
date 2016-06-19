@@ -4,22 +4,20 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/model"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 )
 
-func createUserResources(r router, cfg config.Config, userService service.UserService) {
-	group := r.Group("/users")
+func createUserResources(r router, authMiddleware echo.MiddlewareFunc, userService service.UserService) {
+	group := r.Group("/users", authMiddleware)
 
-	group.Use(authorizationMiddleware(cfg.GetString(config.JwtKey)))
-	group.POST("", createUserResource(userService), metricsHandler("post_user"), requireAdminMiddleware("Only admins may create users."))
-	group.GET("", getUsersResource(userService), metricsHandler("get_users"))
-	group.GET("/:userid", getUserResource(userService), metricsHandler("get_user"))
-	group.PUT("/:userid", updateUserResource(userService), metricsHandler("update_user"))
-	group.DELETE("/:userid", deleteUserResource(userService), metricsHandler("delete_user"), requireAdminMiddleware("Only admins may delete users."))
-	group.PUT("/:userid/password", updateUserPasswordResource(userService), metricsHandler("update_user_password"))
+	group.POST("", createUserResource(userService), metricsMiddleware("post_user"), requireAdminMiddleware("Only admins may create users."))
+	group.GET("", getUsersResource(userService), metricsMiddleware("get_users"))
+	group.GET("/:userid", getUserResource(userService), metricsMiddleware("get_user"))
+	group.PUT("/:userid", updateUserResource(userService), metricsMiddleware("update_user"))
+	group.DELETE("/:userid", deleteUserResource(userService), metricsMiddleware("delete_user"), requireAdminMiddleware("Only admins may delete users."))
+	group.PUT("/:userid/password", updateUserPasswordResource(userService), metricsMiddleware("update_user_password"))
 }
 
 func createUserResource(s service.UserService) echo.HandlerFunc {

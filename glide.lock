@@ -1,5 +1,5 @@
-hash: 455bed2403eeb10f0b8e6178661e0c3e97ec7377e13654773db7892a0d122094
-updated: 2016-06-12T14:59:17.27506183-06:00
+hash: c509734bd068e1beae2e3e312f018a4edec735e826e824902e3e50c339c196b4
+updated: 2016-06-18T20:27:58.495556104-06:00
 imports:
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
@@ -36,15 +36,15 @@ imports:
   version: 6e183fd3d8063a14da04fa4439c52fb6b84d1cdb
   subpackages:
   - engine/fasthttp
+  - log
   - middleware
   - engine
-  - log
 - name: github.com/labstack/gommon
   version: 722aa12d41c236ce78ff48eac1cafe0107ecdc9d
   subpackages:
+  - color
   - log
   - bytes
-  - color
 - name: github.com/magiconair/properties
   version: c265cfa48dda6474e208715ca93e987829f572f8
 - name: github.com/mattn/go-colorable
@@ -59,8 +59,6 @@ imports:
   - difflib
 - name: github.com/rcrowley/go-metrics
   version: eeba7bd0dd01ace6e690fa833b3f22aaec29af43
-- name: github.com/Sirupsen/logrus
-  version: f3cfb454f4c209e6668c95216c4744b8fddb2356
 - name: github.com/spf13/cast
   version: 27b586b42e29bec072fe7379259cc719e1289da6
 - name: github.com/spf13/jwalterweatherman

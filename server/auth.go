@@ -4,20 +4,14 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/infiniteprimates/smoke/model"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
-type (
-	authResponse struct {
-		AuthType string `json:"type"`
-		Token    string `json:"token"`
-	}
-)
-
 func createAuthResources(r router, authService service.AuthService) {
-	r.POST("/auth", postAuthorizationResource(authService), metricsHandler("get_auth"), basicAuthExtractor())
+	r.POST("/auth", postAuthorizationResource(authService), metricsMiddleware("get_auth"), basicAuthExtractor())
 }
 
 func postAuthorizationResource(authService service.AuthService) echo.HandlerFunc {
@@ -30,7 +24,7 @@ func postAuthorizationResource(authService service.AuthService) echo.HandlerFunc
 			return newStatus(http.StatusUnauthorized)
 		}
 
-		return c.JSON(http.StatusOK, &authResponse{
+		return c.JSON(http.StatusOK, &model.Auth{
 			AuthType: "bearer",
 			Token:    token,
 		})

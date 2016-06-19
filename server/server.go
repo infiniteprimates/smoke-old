@@ -2,13 +2,13 @@ package server
 
 import (
 	"fmt"
-	"io"
 	"net"
 
 	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/fasthttp"
+	"github.com/labstack/echo/log"
 	"github.com/labstack/echo/middleware"
 )
 
@@ -42,8 +42,19 @@ type (
 	}
 )
 
-func New(logWriter io.Writer, cfg config.Config, userService service.UserService, authService service.AuthService) (Server, error) {
+func New(logger log.Logger, cfg config.Config, userService service.UserService, authService service.AuthService) (Server, error) {
+	ip := cfg.GetString(config.Ip)
+	if net.ParseIP(ip) == nil {
+		return nil, fmt.Errorf("Configured listen ip '%s' is invalid", ip)
+	}
+
+	port := cfg.GetInt(config.Port)
+	if port < 1 || port > 65535 {
+		return nil, fmt.Errorf("Configured listen port '%s' is invalid", cfg.GetString(config.Port))
+	}
+
 	e := echo.New()
+	e.SetLogger(logger)
 
 	e.SetHTTPErrorHandler(smokeErrorHandler(e))
 
@@ -51,11 +62,11 @@ func New(logWriter io.Writer, cfg config.Config, userService service.UserService
 		e.SetDebug(debug)
 	}
 
-	logConfig := middleware.DefaultLoggerConfig
-	logConfig.Output = logWriter
-	e.Use(middleware.LoggerWithConfig(logConfig))
-
-	e.Use(middleware.Recover())
+	e.Use(
+		middleware.Logger(),
+		middleware.Recover(),
+		middleware.Gzip(),
+	)
 
 	if cfg.GetBool(config.DevCors) {
 		corsConfig := middleware.DefaultCORSConfig
@@ -69,16 +80,6 @@ func New(logWriter io.Writer, cfg config.Config, userService service.UserService
 
 	createResources(e, cfg, userService, authService)
 
-	ip := cfg.GetString(config.Ip)
-	if net.ParseIP(ip) == nil {
-		return nil, fmt.Errorf("Configured listen ip '%s' is invalid", ip)
-	}
-
-	port := cfg.GetInt(config.Port)
-	if port < 1 || port > 65535 {
-		return nil, fmt.Errorf("Configured listen port '%s' is invalid", cfg.GetString(config.Port))
-	}
-
 	server := &server{
 		Echo: e,
 		ip:   ip,
@@ -89,9 +90,11 @@ func New(logWriter io.Writer, cfg config.Config, userService service.UserService
 }
 
 func createResources(r router, cfg config.Config, userService service.UserService, authService service.AuthService) {
+	authMiddleWare := authorizationMiddleware(cfg.GetString(config.JwtKey))
 	group := r.Group("/api")
+	createMetricsResources(group, cfg, authMiddleWare)
 	createAuthResources(group, authService)
-	createUserResources(group, cfg, userService)
+	createUserResources(group, authMiddleWare, userService)
 }
 
 func (server *server) Start() {

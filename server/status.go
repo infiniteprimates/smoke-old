@@ -53,6 +53,7 @@ func smokeErrorHandler(e *echo.Echo) echo.HTTPErrorHandler {
 				c.JSON(status.Code, status)
 			}
 		} else {
+			//TODO: override the default http error handler? add some additional logging?
 			defaultHttpErrorHandler(err, c)
 		}
 	}

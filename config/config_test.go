@@ -26,7 +26,7 @@ func TestDefaults(t *testing.T) {
 	assert.Equal(t, defaultDebug, config.GetBool(Debug), "Config '%s' default is incorrect.", Debug)
 	assert.Equal(t, defaultDevCors, config.GetBool(DevCors), "Config '%s' default is incorrect.", DevCors)
 	assert.Equal(t, defaultIp, config.GetString(Ip), "Config '%s' default is incorrect.", Ip)
-	assert.Equal(t, defaultMetricsLoggingInterval, config.GetInt(MetricsLoggingInterval), "Config '%s' default is incorrect.", MetricsLoggingInterval)
+	assert.Equal(t, defaultMetricsPublishingInterval, config.GetInt(MetricsPublishingInterval), "Config '%s' default is incorrect.", MetricsPublishingInterval)
 	assert.Equal(t, defaultPort, config.GetInt(Port), "Config '%s' default is incorrect.", Port)
 	assert.Equal(t, defaultUiRoot, config.GetString(UiRoot), "Config '%s' default is incorrect.", UiRoot)
 }
@@ -45,14 +45,14 @@ func TestValues(t *testing.T) {
 	os.Setenv(createEnvName(Debug), strconv.FormatBool(!defaultDebug))
 	os.Setenv(createEnvName(DevCors), strconv.FormatBool(!defaultDevCors))
 	os.Setenv(createEnvName(Ip), ip)
-	os.Setenv(createEnvName(MetricsLoggingInterval), strconv.Itoa(metricsLoggingInterval))
+	os.Setenv(createEnvName(MetricsPublishingInterval), strconv.Itoa(metricsLoggingInterval))
 	os.Setenv(createEnvName(Port), strconv.Itoa(port))
 	os.Setenv(createEnvName(UiRoot), uiRoot)
 
 	assert.Equal(t, !defaultDebug, config.GetBool(Debug), "Config '%s' default is incorrect.", Debug)
 	assert.Equal(t, !defaultDevCors, config.GetBool(DevCors), "Config '%s' default is incorrect.", DevCors)
 	assert.Equal(t, ip, config.GetString(Ip), "Config '%s' default is incorrect.", Ip)
-	assert.Equal(t, metricsLoggingInterval, config.GetInt(MetricsLoggingInterval), "Config '%s' default is incorrect.", MetricsLoggingInterval)
+	assert.Equal(t, metricsLoggingInterval, config.GetInt(MetricsPublishingInterval), "Config '%s' default is incorrect.", MetricsPublishingInterval)
 	assert.Equal(t, port, config.GetInt(Port), "Config '%s' default is incorrect.", Port)
 	assert.Equal(t, uiRoot, config.GetString(UiRoot), "Config '%s' default is incorrect.", UiRoot)
 

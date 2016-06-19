@@ -15,14 +15,15 @@ func TestAuthService_AuthenticateUser_Success(t *testing.T) {
 	cfg := new(mockcfg.ConfigMock)
 	userDb := new(mockdb.UserDbMock)
 	svc := NewAuthService(cfg, userDb)
-	user := &db.User {
+	user := &db.User{
 		Username: "user",
 	}
-	if passwordHash, err := svc.HashPassword("password") ; !assert.NoError(t, err, "Password hashing failed.") {
+	passwordHash, err := svc.HashPassword("password")
+	if !assert.NoError(t, err, "Password hashing failed.") {
 		return
-	} else {
-		user.PasswordHash = passwordHash
 	}
+
+	user.PasswordHash = passwordHash
 
 	userDb.On("Find", "username").Return(user, nil)
 	cfg.On("GetString", config.JwtKey).Return(config.JwtKey)
@@ -30,6 +31,29 @@ func TestAuthService_AuthenticateUser_Success(t *testing.T) {
 	token, err := svc.AuthenticateUser("username", "password")
 	if assert.NoError(t, err, "An error occurred authenticating user.") {
 		assert.NotEmpty(t, token, "An empty token was returned.")
+	}
+}
+
+func TestAuthService_AuthenticateUser_BadPassword(t *testing.T) {
+	cfg := new(mockcfg.ConfigMock)
+	userDb := new(mockdb.UserDbMock)
+	svc := NewAuthService(cfg, userDb)
+	user := &db.User{
+		Username: "user",
+	}
+	passwordHash, err := svc.HashPassword("password")
+	if !assert.NoError(t, err, "Password hashing failed.") {
+		return
+	}
+
+	user.PasswordHash = passwordHash
+
+	userDb.On("Find", "username").Return(user, nil)
+	cfg.On("GetString", config.JwtKey).Return(config.JwtKey)
+
+	token, err := svc.AuthenticateUser("username", "badpassword")
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Empty(t, token, "Token was not empty.")
 	}
 }
 

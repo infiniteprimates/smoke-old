@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/stretchr/testify/mock"
 	"github.com/infiniteprimates/smoke/model"
+	"github.com/stretchr/testify/mock"
 )
 
 type (

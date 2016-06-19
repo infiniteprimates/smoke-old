@@ -100,7 +100,7 @@ func (s *userService) UpdateUserPassword(userId string, passwordReset *model.Pas
 	return s.userDb.UpdateUserPassword(userId, hashedPassword)
 }
 
-func (_ *userService) userEntityToModel(userEntity *db.User) *model.User {
+func (s *userService) userEntityToModel(userEntity *db.User) *model.User {
 	userModel := &model.User{
 		Username: userEntity.Username,
 		IsAdmin:  userEntity.IsAdmin,
@@ -109,7 +109,7 @@ func (_ *userService) userEntityToModel(userEntity *db.User) *model.User {
 	return userModel
 }
 
-func (_ *userService) userModelToEntity(userModel *model.User) *db.User {
+func (s *userService) userModelToEntity(userModel *model.User) *db.User {
 	userEntity := &db.User{
 		Username: userModel.Username,
 		IsAdmin:  userModel.IsAdmin,

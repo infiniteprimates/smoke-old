@@ -17,12 +17,12 @@ func TestUserService_Create_Success(t *testing.T) {
 
 	user := model.User{
 		Username: "username",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 
 	userEntity := db.User{
 		Username: user.Username,
-		IsAdmin: user.IsAdmin,
+		IsAdmin:  user.IsAdmin,
 	}
 
 	userDb.On("Create", &userEntity).Return(&userEntity, nil)
@@ -40,12 +40,12 @@ func TestUserService_Create_Error(t *testing.T) {
 
 	user := model.User{
 		Username: "username",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 
 	userEntity := db.User{
 		Username: user.Username,
-		IsAdmin: user.IsAdmin,
+		IsAdmin:  user.IsAdmin,
 	}
 
 	userDb.On("Create", &userEntity).Return(nil, errors.New("Danger!!"))
@@ -62,7 +62,7 @@ func TestUserService_Find_Success(t *testing.T) {
 
 	userEntity := db.User{
 		Username: "username",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 
 	userDb.On("Find", "username").Return(&userEntity, nil)
@@ -92,12 +92,12 @@ func TestUserService_List_Success(t *testing.T) {
 
 	user := &model.User{
 		Username: "username",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 
 	userEntities := []*db.User{{
 		Username: "username",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}}
 
 	userDb.On("List").Return(userEntities, nil)
@@ -127,12 +127,12 @@ func TestUserService_Update_Success(t *testing.T) {
 
 	user := model.User{
 		Username: "username",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 
 	userEntity := db.User{
 		Username: user.Username,
-		IsAdmin: user.IsAdmin,
+		IsAdmin:  user.IsAdmin,
 	}
 
 	userDb.On("Update", &userEntity).Return(&userEntity, nil)
@@ -150,12 +150,12 @@ func TestUserService_Update_Error(t *testing.T) {
 
 	user := model.User{
 		Username: "username",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 
 	userEntity := db.User{
 		Username: user.Username,
-		IsAdmin: user.IsAdmin,
+		IsAdmin:  user.IsAdmin,
 	}
 
 	userDb.On("Update", &userEntity).Return(nil, errors.New("Oh noes!"))

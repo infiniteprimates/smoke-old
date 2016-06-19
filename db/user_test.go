@@ -9,7 +9,7 @@ import (
 
 func TestUserDb_Create_Success(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
@@ -24,12 +24,12 @@ func TestUserDb_Create_Success(t *testing.T) {
 
 func TestUserDb_Create_AlreadyExists(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
-		db.(*userDb).users = map[string]User{ user.Username : user }
+		db.(*userDb).users = map[string]User{user.Username: user}
 		_, err := db.Create(&user)
 		if assert.Error(t, err, "Expected error not returned.") {
 			if dbErr, ok := err.(*dbError); ok {
@@ -43,7 +43,7 @@ func TestUserDb_Create_AlreadyExists(t *testing.T) {
 
 func TestUserDb_Find_Success(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
@@ -58,12 +58,12 @@ func TestUserDb_Find_Success(t *testing.T) {
 
 func TestUserDb_Find_NotFound(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
-		db.(*userDb).users = map[string]User{user.Username : user}
+		db.(*userDb).users = map[string]User{user.Username: user}
 		_, err := db.Find("bogus")
 		if assert.Error(t, err, "Expected error not returned.") {
 			if dbErr, ok := err.(*dbError); ok {
@@ -77,15 +77,15 @@ func TestUserDb_Find_NotFound(t *testing.T) {
 
 func TestUserDb_List_Success(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	admin := User {
+	admin := User{
 		Username: "admin",
 	}
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
-		db.(*userDb).users = map[string]User{ admin.Username : admin, user.Username: user }
+		db.(*userDb).users = map[string]User{admin.Username: admin, user.Username: user}
 		result, err := db.List()
 		if assert.NoError(t, err, "An error occured while listing users.") && assert.NotNil(t, result, "List result was nil.") {
 			assert.Len(t, result, 2, "List size is incorrect.")
@@ -97,12 +97,12 @@ func TestUserDb_List_Success(t *testing.T) {
 
 func TestUserDb_Update_Exists(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
-		db.(*userDb).users = map[string]User{ user.Username: user }
+		db.(*userDb).users = map[string]User{user.Username: user}
 		result, err := db.Update(&user)
 		if assert.NoError(t, err, "An error occured creating a user.") {
 			assert.Equal(t, &user, result, "Users mismatch.")
@@ -112,7 +112,7 @@ func TestUserDb_Update_Exists(t *testing.T) {
 
 func TestUserDb_Update_NotExists(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
@@ -132,11 +132,11 @@ func TestUserDb_Update_NotExists(t *testing.T) {
 
 func TestUserDb_Delete_Exists(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
-	db.(*userDb).users = map[string]User{ user.Username: user}
+	db.(*userDb).users = map[string]User{user.Username: user}
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
 		err := db.Delete(user.Username)
 		assert.NoError(t, err, "An error occured deleting a user.")
@@ -155,12 +155,12 @@ func TestUserDb_Delete_NotExists(t *testing.T) {
 
 func TestUserDb_UpdateUserPassword_Exists(t *testing.T) {
 	cfg := new(config.ConfigMock)
-	user := User {
+	user := User{
 		Username: "user",
 	}
 	db, err := NewUserDb(cfg)
 	if assert.NoError(t, err, "An error occured instantiating a UserDb.") {
-		db.(*userDb).users = map[string]User{ user.Username: user }
+		db.(*userDb).users = map[string]User{user.Username: user}
 		err := db.UpdateUserPassword(user.Username, "hash")
 		assert.NoError(t, err, "An error occured updating a user's password.")
 	}
