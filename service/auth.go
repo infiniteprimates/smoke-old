@@ -11,9 +11,14 @@ import (
 )
 
 type (
-	AuthService struct {
-		cfg    *config.Config
-		userDb *db.UserDb
+	AuthService interface {
+		AuthenticateUser(username string, password string) (string, error)
+		HashPassword(password string) (string, error)
+	}
+
+	authService struct {
+		cfg    config.Config
+		userDb db.UserDb
 	}
 )
 
@@ -21,18 +26,18 @@ const (
 	Issuer = "Smoke"
 )
 
-func NewAuthService(cfg *config.Config, userDb *db.UserDb) *AuthService {
-	return &AuthService{
+func NewAuthService(cfg config.Config, userDb db.UserDb) AuthService {
+	return &authService{
 		cfg:    cfg,
 		userDb: userDb,
 	}
 }
 
-func (s *AuthService) AuthenticateUser(username string, password string) (string, error) {
+func (s *authService) AuthenticateUser(username string, password string) (string, error) {
 	user, err := s.userDb.Find(username)
 	if err != nil {
 		// hash the password so this takes time like a validation
-		_, _ = s.hashPassword(password)
+		_, _ = s.HashPassword(password)
 		return "", errors.New("Invalid credentials.")
 	}
 
@@ -43,20 +48,21 @@ func (s *AuthService) AuthenticateUser(username string, password string) (string
 	return s.generateJwt(user)
 }
 
-func (s *AuthService) hashPassword(password string) (string, error) {
+func (s *authService) HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hashedPassword), err
 }
 
-func (s *AuthService) validatePassword(password string, hash string) bool {
+func (s *authService) validatePassword(password string, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
-func (s *AuthService) generateJwt(user *db.User) (string, error) {
+func (s *authService) generateJwt(user *db.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["iss"] = Issuer
 	token.Claims["sub"] = user.Username
+	//TODO: Configurable expiration
 	token.Claims["exp"] = time.Now().Add(1 * time.Hour).Unix()
 	token.Claims["isAdmin"] = user.IsAdmin
 

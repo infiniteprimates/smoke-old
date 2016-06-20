@@ -2,7 +2,6 @@ package: github.com/infiniteprimates/smoke
 homepage: https://github.com/infiniteprimates/smoke
 license: MIT
 import:
-- package: github.com/Sirupsen/logrus
 - package: github.com/rcrowley/go-metrics
 - package: github.com/dgrijalva/jwt-go
 - package: golang.org/x/crypto
@@ -10,3 +9,6 @@ import:
   - bcrypt
 - package: github.com/spf13/viper
 - package: github.com/labstack/echo
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert

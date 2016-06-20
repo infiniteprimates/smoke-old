@@ -2,45 +2,45 @@ package config
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/spf13/viper"
 )
 
 type (
-	Config struct {
-		*viper.Viper
+	Config interface {
+		AllSettings() map[string]interface{}
+		GetBool(key string) bool
+		GetInt(key string) int
+		GetString(key string) string
 	}
 )
 
 const (
-	Debug                  = "debug"
-	DevCors                = "dev_cors"
-	Ip                     = "ip"
-	JwtKey                 = "jwt_key"
-	MetricsLoggingInterval = "metrics_logging_interval"
-	Port                   = "port"
-	UiRoot                 = "ui_root"
+	EnvPrefix = "smoke"
+
+	Debug                     = "debug"
+	DevCors                   = "dev_cors"
+	Ip                        = "ip"
+	JwtKey                    = "jwt_key"
+	MetricsPublishingInterval = "metrics_publishing_interval"
+	Port                      = "port"
+	UiRoot                    = "ui_root"
+
+	defaultDebug                     = true
+	defaultDevCors                   = false
+	defaultIp                        = "0.0.0.0"
+	defaultMetricsPublishingInterval = 15
+	defaultPort                      = 8080
+	defaultUiRoot                    = "dist"
 )
 
-var (
-	config *Config
-	once   sync.Once
-)
+func GetConfig() (Config, error) {
+	config := viper.New()
 
-func GetConfig() (*Config, error) {
-	once.Do(func() {
-		viperConfig := viper.New()
+	config.AutomaticEnv()
+	config.SetEnvPrefix(EnvPrefix)
 
-		config = &Config{
-			Viper: viperConfig,
-		}
-
-		config.AutomaticEnv()
-		config.SetEnvPrefix("smoke")
-
-		setDefaults(config)
-	})
+	setDefaults(config)
 
 	if err := validateConfig(config); err != nil {
 		return nil, err
@@ -49,19 +49,26 @@ func GetConfig() (*Config, error) {
 	return config, nil
 }
 
-func setDefaults(config *Config) {
-	config.SetDefault(Debug, false)
-	config.SetDefault(DevCors, false)
-	config.SetDefault(Ip, "0.0.0.0")
-	config.SetDefault(MetricsLoggingInterval, 5)
-	config.SetDefault(Port, 8080)
-	config.SetDefault(UiRoot, "dist")
+func setDefaults(config *viper.Viper) {
+	config.SetDefault(Debug, defaultDebug)
+	config.SetDefault(DevCors, defaultDevCors)
+	config.SetDefault(Ip, defaultIp)
+	config.SetDefault(MetricsPublishingInterval, defaultMetricsPublishingInterval)
+	config.SetDefault(Port, defaultPort)
+	config.SetDefault(UiRoot, defaultUiRoot)
 }
 
-func validateConfig(config *Config) error {
+func validateConfig(config *viper.Viper) error {
+	var err error
+	errMsg := ""
+
 	if !config.IsSet(JwtKey) {
-		return fmt.Errorf("Configuration '%s' is required.", JwtKey)
+		errMsg += fmt.Sprintf("Configuration '%s' is required. ", JwtKey)
 	}
 
-	return nil
+	if len(errMsg) > 0 {
+		err = fmt.Errorf(errMsg)
+	}
+
+	return err
 }
