@@ -13,7 +13,7 @@ build:
           go get github.com/Masterminds/glide/...
 
     - script:
-        name: install glide
+        name: install dependencies
         code: |
           glide install
 
