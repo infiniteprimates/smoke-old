@@ -1,0 +1,28 @@
+build:
+  box:
+    id: golang
+    tag: 1.6.2
+
+  steps:
+    - setup-go-workspace:
+        package-dir: github.com/infiniteprimates/smoke
+
+    - script:
+        name: install glide
+        code: |
+          go get github.com/Masterminds/glide/...
+
+    - script:
+        name: install glide
+        code: |
+          glide install
+
+    - script:
+        name: go test
+        code: |
+          go test $(go list ./... | grep -v /vendor/)
+
+    - script:
+        name: go build
+        code: |
+          go build
