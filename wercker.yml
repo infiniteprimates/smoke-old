@@ -29,6 +29,8 @@ build:
         code: |
           overalls -project=github.com/infiniteprimates/smoke -covermode=count -ignore=vendor,.git,.wercker,ui,mocks
           goveralls -coverprofile=overalls.coverprofile -service=wercker.com -repotoken $COVERALLS_TOKEN
+          cp overalls.coverprofile coverage.txt
+          bash <(curl -s https://codecov.io/bash) -r infiniteprimates/smoke
 
     - script:
         name: go build
