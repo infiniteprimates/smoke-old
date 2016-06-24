@@ -8,9 +8,11 @@ build:
         package-dir: github.com/infiniteprimates/smoke
 
     - script:
-        name: install glide
+        name: install tools
         code: |
           go get github.com/Masterminds/glide/...
+          go get github.com/go-playground/overalls/...
+          go get github.com/mattn/goveralls
 
     - script:
         name: install dependencies
@@ -20,7 +22,13 @@ build:
     - script:
         name: go test
         code: |
-          go test $(go list ./... | grep -v /vendor/)
+          go test $(glide nv | grep -v /mocks/)
+
+    - script:
+        name: coverage
+        code: |
+          overalls -project=github.com/infiniteprimates/smoke -covermode=count -ignore=vendor,.git,.wercker,ui,mocks
+          goveralls -coverprofile=overalls.coverprofile -service=wercker.com -repotoken $COVERALLS_TOKEN
 
     - script:
         name: go build
