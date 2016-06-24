@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
@@ -95,6 +96,10 @@ func createResources(r router, cfg config.Config, userService service.UserServic
 	createMetricsResources(group, cfg, authMiddleWare)
 	createAuthResources(group, authService)
 	createUserResources(group, authMiddleWare, userService)
+}
+
+func extractClaims(c echo.Context) jwt.MapClaims {
+	return c.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)
 }
 
 func (server *server) Start() {

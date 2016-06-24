@@ -60,11 +60,13 @@ func (s *authService) validatePassword(password string, hash string) bool {
 
 func (s *authService) generateJwt(user *db.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["iss"] = Issuer
-	token.Claims["sub"] = user.Username
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["iss"] = Issuer
+	claims["sub"] = user.Username
 	//TODO: Configurable expiration
-	token.Claims["exp"] = time.Now().Add(1 * time.Hour).Unix()
-	token.Claims["isAdmin"] = user.IsAdmin
+	claims["exp"] = time.Now().Add(1 * time.Hour).Unix()
+	claims["isAdmin"] = user.IsAdmin
 
 	return token.SignedString([]byte(s.cfg.GetString(config.JwtKey)))
 }

@@ -1,14 +1,14 @@
-hash: c509734bd068e1beae2e3e312f018a4edec735e826e824902e3e50c339c196b4
-updated: 2016-06-18T20:27:58.495556104-06:00
+hash: 359869cd729cda1f84276461650a5d5c33a0b064d9a578d9ebc8af926429aa62
+updated: 2016-06-23T19:28:20.228185793-06:00
 imports:
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
 - name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  version: 2df174808ee097f90d259e432cc04442cf60be21
   subpackages:
   - spew
 - name: github.com/dgrijalva/jwt-go
-  version: c04502f106d7c5b3fae17c5da49a1bbdd3006b3c
+  version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/fsnotify/fsnotify
   version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
 - name: github.com/hashicorp/hcl
@@ -33,7 +33,7 @@ imports:
 - name: github.com/klauspost/crc32
   version: 19b0b332c9e4516a6370a0456e6182c3b5036720
 - name: github.com/labstack/echo
-  version: 6e183fd3d8063a14da04fa4439c52fb6b84d1cdb
+  version: fbcdf70c52c155ae9aa58e72ee0532fa2f1cad2e
   subpackages:
   - engine/fasthttp
   - log
@@ -42,8 +42,8 @@ imports:
 - name: github.com/labstack/gommon
   version: 722aa12d41c236ce78ff48eac1cafe0107ecdc9d
   subpackages:
-  - color
   - log
+  - color
   - bytes
 - name: github.com/magiconair/properties
   version: c265cfa48dda6474e208715ca93e987829f572f8
@@ -70,13 +70,14 @@ imports:
 - name: github.com/stretchr/objx
   version: cbeaeb16a013161a98496fad62933b1d21786672
 - name: github.com/stretchr/testify
-  version: 8d64eb7173c7753d6419fd4a9caf057398611364
+  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
   subpackages:
   - assert
   - mock
 - name: github.com/valyala/fasthttp
   version: 8db7d05839b5f4d21d5da1fcb3897d294ff6fd9f
   subpackages:
+  - expvarhandler
   - fasthttputil
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
@@ -95,4 +96,4 @@ imports:
   - unix
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
-devImports: []
+testImports: []

@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/infiniteprimates/smoke/model"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
@@ -38,8 +37,8 @@ func authorizationMiddleware(jwtKey string) echo.MiddlewareFunc {
 func requireAdminMiddleware(message string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			user := c.Get("user").(*jwt.Token)
-			if !user.Claims["isAdmin"].(bool) {
+			claims := extractClaims(c)
+			if !claims["isAdmin"].(bool) {
 				return newStatusWithMessage(http.StatusForbidden, message)
 			}
 			return next(c)
