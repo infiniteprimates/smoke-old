@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/infiniteprimates/smoke/model"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
@@ -63,8 +62,9 @@ func getUsersResource(s service.UserService) echo.HandlerFunc {
 func updateUserResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
-		authUser := c.Get("user").(*jwt.Token).Claims["sub"].(string)
-		isAdmin := c.Get("user").(*jwt.Token).Claims["isAdmin"].(bool)
+		claims := extractClaims(c)
+		authUser := claims["sub"].(string)
+		isAdmin := claims["isAdmin"].(bool)
 
 		user := new(model.User)
 		if err := c.Bind(user); err != nil {
@@ -99,7 +99,8 @@ func updateUserResource(s service.UserService) echo.HandlerFunc {
 func deleteUserResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
-		if authUser := c.Get("user").(*jwt.Token).Claims["sub"]; authUser == userId {
+		claims := extractClaims(c)
+		if authUser := claims["sub"]; authUser == userId {
 			return newStatusWithMessage(http.StatusForbidden, "You can't delete yourself.")
 		}
 
@@ -115,8 +116,9 @@ func deleteUserResource(s service.UserService) echo.HandlerFunc {
 func updateUserPasswordResource(userService service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := c.Param("userid")
-		authUser := c.Get("user").(*jwt.Token).Claims["sub"].(string)
-		isAdmin := c.Get("user").(*jwt.Token).Claims["isAdmin"].(bool)
+		claims := extractClaims(c)
+		authUser := claims["sub"].(string)
+		isAdmin := claims["isAdmin"].(bool)
 
 		passwordReset := new(model.PasswordReset)
 		if err := c.Bind(passwordReset); err != nil {
