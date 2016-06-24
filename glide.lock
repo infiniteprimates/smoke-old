@@ -1,5 +1,5 @@
-hash: 359869cd729cda1f84276461650a5d5c33a0b064d9a578d9ebc8af926429aa62
-updated: 2016-06-23T19:28:20.228185793-06:00
+hash: 63f1d4ddc60aaf1bd3b2e271715eaff931f39cc72328bda38a84d775abe0a7dc
+updated: 2016-06-23T22:07:16.52508521-06:00
 imports:
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
@@ -12,7 +12,7 @@ imports:
 - name: github.com/fsnotify/fsnotify
   version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
 - name: github.com/hashicorp/hcl
-  version: d7400db7143f8e869812e50a53acd6c8d92af3b8
+  version: 5b7dbf7eefffea49afb3c9655d6582c72fae5fd1
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -58,7 +58,7 @@ imports:
   subpackages:
   - difflib
 - name: github.com/rcrowley/go-metrics
-  version: eeba7bd0dd01ace6e690fa833b3f22aaec29af43
+  version: cfa5a85e9f0abbdf1701b59082c36fc7bff10759
 - name: github.com/spf13/cast
   version: 27b586b42e29bec072fe7379259cc719e1289da6
 - name: github.com/spf13/jwalterweatherman
@@ -69,13 +69,10 @@ imports:
   version: c1ccc378a054ea8d4e38d8c67f6938d4760b53dd
 - name: github.com/stretchr/objx
   version: cbeaeb16a013161a98496fad62933b1d21786672
-- name: github.com/stretchr/testify
-  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
-  subpackages:
-  - assert
-  - mock
+- name: github.com/valyala/bytebufferpool
+  version: ea471ff2ce48e46b4aa4e273904ce295a91723d9
 - name: github.com/valyala/fasthttp
-  version: 8db7d05839b5f4d21d5da1fcb3897d294ff6fd9f
+  version: 3148999d1e352f576e3798d5c924d1957ed46ecb
   subpackages:
   - expvarhandler
   - fasthttputil
@@ -87,13 +84,18 @@ imports:
   - bcrypt
   - blowfish
 - name: golang.org/x/net
-  version: 3f122ce3dbbe488b7e6a8bdb26f41edec852a40b
+  version: bc3663df0ac92f928d419e31e0d2af22e683a5a2
   subpackages:
   - context
 - name: golang.org/x/sys
-  version: 7f918dd405547ecb864d14a8ecbbfe205b5f930f
+  version: 62bee037599929a6e9146f29d10dd5208c43507d
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
-testImports: []
+testImports:
+- name: github.com/stretchr/testify
+  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
+  subpackages:
+  - assert
+  - mock

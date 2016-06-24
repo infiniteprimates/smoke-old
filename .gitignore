@@ -3,6 +3,7 @@
 .wercker
 smoke
 vendor
+*.coverprofile
 
 # UI - compiled output
 /ui/dist
