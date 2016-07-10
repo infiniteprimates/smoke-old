@@ -72,7 +72,7 @@ func updateUserResource(s service.UserService) echo.HandlerFunc {
 		}
 
 		if user.Username != userId {
-			return newStatusWithMessage(http.StatusBadRequest, "Url userId '%s' and json userId '%s' are mismatched.", userId, user.Username)
+			return newStatusWithMessage(http.StatusBadRequest, "URL userId '%s' and JSON userId '%s' are mismatched.", userId, user.Username)
 		}
 
 		if authUser != userId && !isAdmin {
@@ -80,7 +80,7 @@ func updateUserResource(s service.UserService) echo.HandlerFunc {
 		}
 
 		if !isAdmin && user.IsAdmin {
-			return newStatusWithMessage(http.StatusForbidden, "Only admins may make other users admins.")
+			return newStatusWithMessage(http.StatusForbidden, "You can't elevate yourself to admin. Tsk tsk!")
 		}
 
 		if isAdmin && !user.IsAdmin && authUser == user.Username {
@@ -89,7 +89,7 @@ func updateUserResource(s service.UserService) echo.HandlerFunc {
 
 		user, err := s.Update(user)
 		if err != nil {
-			return newStatusWithMessage(http.StatusBadRequest, err.Error())
+			return newStatusWithMessage(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, user)

@@ -29,6 +29,10 @@ func TestAuthService_AuthenticateUser_Success(t *testing.T) {
 	cfg.On("GetString", config.JwtKey).Return(config.JwtKey)
 
 	token, err := svc.AuthenticateUser("username", "password")
+
+	userDb.AssertExpectations(t)
+	cfg.AssertExpectations(t)
+
 	if assert.NoError(t, err, "An error occurred authenticating user.") {
 		assert.NotEmpty(t, token, "An empty token was returned.")
 	}
@@ -49,9 +53,12 @@ func TestAuthService_AuthenticateUser_BadPassword(t *testing.T) {
 	user.PasswordHash = passwordHash
 
 	userDb.On("Find", "username").Return(user, nil)
-	cfg.On("GetString", config.JwtKey).Return(config.JwtKey)
 
 	token, err := svc.AuthenticateUser("username", "badpassword")
+
+	userDb.AssertExpectations(t)
+	cfg.AssertExpectations(t)
+
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Empty(t, token, "Token was not empty.")
 	}
@@ -65,6 +72,10 @@ func TestAuthService_AuthenticateUser_NoUser(t *testing.T) {
 	userDb.On("Find", "username").Return(nil, errors.New("Failure"))
 
 	token, err := svc.AuthenticateUser("username", "password")
+
+	userDb.AssertExpectations(t)
+	cfg.AssertExpectations(t)
+
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Empty(t, token, "Token was not empty.")
 	}

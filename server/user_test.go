@@ -46,6 +46,9 @@ func TestUserResource_createUserResource_Success(t *testing.T) {
 	handler := createUserResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.NoError(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusCreated, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
@@ -63,6 +66,9 @@ func TestUserResource_createUserResource_BadJson(t *testing.T) {
 	handler := createUserResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Equal(t, err.(*smokeStatus).Code, http.StatusBadRequest, "Invalid status.")
 	}
@@ -86,6 +92,9 @@ func TestUserResource_createUserResource_CreateError(t *testing.T) {
 	handler := createUserResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Equal(t, err.(*smokeStatus).Code, http.StatusBadRequest, "Invalid status.")
 		assert.Equal(t, err.(*smokeStatus).Message, failureMsg, "Invalid message.")
@@ -112,6 +121,8 @@ func TestUserResource_getUserResource_Success(t *testing.T) {
 
 	err := handler(c)
 
+	userSvc.AssertExpectations(t)
+
 	if assert.NoError(t, err, "Unexpected error.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, marshallModel(user), res.Body.String(), "Invalid body.")
@@ -134,6 +145,8 @@ func TestUserResource_getUserResource_Failure(t *testing.T) {
 	handler := getUserResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
 
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Equal(t, http.StatusNotFound, err.(*smokeStatus).Code, "Invalid status.")
@@ -159,6 +172,9 @@ func TestUserResource_getUsersResource_Success(t *testing.T) {
 	handler := getUsersResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.NoError(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, marshallModel(users), res.Body.String(), "Invalid response.")
@@ -179,6 +195,9 @@ func TestUserResource_getUsersResource_Failure(t *testing.T) {
 	handler := getUsersResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Equal(t, http.StatusInternalServerError, err.(*smokeStatus).Code, "Invalid status.")
 		assert.Equal(t, failureMsg, err.(*smokeStatus).Message, "Invalid message.")
@@ -212,6 +231,9 @@ func TestUserResource_updateUserResource_SuccessUser(t *testing.T) {
 	handler := updateUserResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.NoError(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
@@ -245,9 +267,48 @@ func TestUserResource_updateUserResource_SuccessAdmin(t *testing.T) {
 	handler := updateUserResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.NoError(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
+	}
+}
+
+func TestUserResource_updateUserResource_UpdateFailed(t *testing.T) {
+	username := "bambam"
+	failureMsg := "Failed"
+	userSvc := new(mockservice.UserServiceMock)
+	user := &model.User{
+		Username: username,
+		IsAdmin: false,
+	}
+	body := marshallModel(user)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	userSvc.On("Update", user).Return(nil, errors.New(failureMsg))
+
+	handler := updateUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusInternalServerError, err.(*smokeStatus).Code, "Invalid status.")
 	}
 }
 
@@ -271,11 +332,181 @@ func TestUserResource_updateUserResource_BadJson(t *testing.T) {
 	handler := updateUserResource(userSvc)
 
 	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Equal(t, http.StatusBadRequest, err.(*smokeStatus).Code, "Invalid status.")
 	}
 }
 
+func TestUserResource_updateUserResource_UrlAndModelMismatch(t *testing.T) {
+	username := "bambam"
+	userSvc := new(mockservice.UserServiceMock)
+	user := &model.User{
+		Username: username,
+		IsAdmin: false,
+	}
+	body := marshallModel(user)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/bogus", strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues("bogus")
+
+	handler := updateUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusBadRequest, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
+func TestUserResource_updateUserResource_NotAdminAndNotSelf(t *testing.T) {
+	username := "bambam"
+	userSvc := new(mockservice.UserServiceMock)
+	user := &model.User{
+		Username: username,
+		IsAdmin: false,
+	}
+	body := marshallModel(user)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "not" + username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	handler := updateUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusForbidden, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
+func TestUserResource_updateUserResource_NotAdminMakeSelfAdmin(t *testing.T) {
+	username := "bambam"
+	userSvc := new(mockservice.UserServiceMock)
+	user := &model.User{
+		Username: username,
+		IsAdmin: true,
+	}
+	body := marshallModel(user)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	handler := updateUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusForbidden, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
+func TestUserResource_updateUserResource_DemoteSelf(t *testing.T) {
+	username := "bambam"
+	userSvc := new(mockservice.UserServiceMock)
+	user := &model.User{
+		Username: username,
+		IsAdmin: false,
+	}
+	body := marshallModel(user)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = true
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	handler := updateUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusBadRequest, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
+func TestUserResource_updateUserResource_BOGUS(t *testing.T) {
+	username := "bambam"
+	userSvc := new(mockservice.UserServiceMock)
+	user := &model.User{
+		Username: username,
+		IsAdmin: false,
+	}
+	body := marshallModel(user)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	userSvc.On("Update", user).Return(user, nil)
+
+	handler := updateUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.NoError(t, err, "An error occured invoking handler.") {
+		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
+		assert.Equal(t, body, res.Body.String(), "Invalid response.")
+	}
+}
 func marshallModel(m interface{}) string {
 	b, _ := json.Marshal(m)
 	return string(b)

@@ -41,6 +41,8 @@ func TestAuthResource_postAuthorizationResource_Success(t *testing.T) {
 	handler := postAuthorizationResource(authSvc)
 	err := handler(c)
 
+	authSvc.AssertExpectations(t)
+
 	if assert.NoError(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Contains(t, res.Body.String(), token, "Invalid token.")
@@ -63,6 +65,8 @@ func TestAuthResource_postAuthorizationResource_Unauthorized(t *testing.T) {
 
 	handler := postAuthorizationResource(authSvc)
 	err := handler(c)
+
+	authSvc.AssertExpectations(t)
 
 	if assert.Error(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusUnauthorized, err.(*smokeStatus).Code, "Invalid status.")
