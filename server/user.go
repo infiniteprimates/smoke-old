@@ -52,7 +52,7 @@ func getUsersResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		users, err := s.List()
 		if err != nil {
-			return err
+			return newStatusWithMessage(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, users)
