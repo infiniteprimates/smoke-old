@@ -23,7 +23,7 @@ func TestAuthResource_createAuthResources(t *testing.T) {
 	createAuthResources(router, authSvc)
 }
 
-func TestAuthResource_postAuthorizationResource_success(t *testing.T) {
+func TestAuthResource_postAuthorizationResource_Success(t *testing.T) {
 	username := "user"
 	password := "pass"
 	token := "asdfjkl;"
@@ -40,6 +40,8 @@ func TestAuthResource_postAuthorizationResource_success(t *testing.T) {
 
 	handler := postAuthorizationResource(authSvc)
 	err := handler(c)
+
+	authSvc.AssertExpectations(t)
 
 	if assert.NoError(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
@@ -64,6 +66,8 @@ func TestAuthResource_postAuthorizationResource_Unauthorized(t *testing.T) {
 	handler := postAuthorizationResource(authSvc)
 	err := handler(c)
 
+	authSvc.AssertExpectations(t)
+
 	if assert.Error(t, err, "An error occured invoking handler.") {
 		assert.Equal(t, http.StatusUnauthorized, err.(*smokeStatus).Code, "Invalid status.")
 	}
@@ -74,7 +78,7 @@ func TestAuthResource_authorizationMiddleware(t *testing.T) {
 	assert.NotNil(t, mw, "Middleware was nil.")
 }
 
-func TestAuthResource_requireAdminMiddleware_success(t *testing.T) {
+func TestAuthResource_requireAdminMiddleware_Success(t *testing.T) {
 	successMsg := "Success"
 	failureMsg := "Failure"
 	e := echo.New()
@@ -120,7 +124,7 @@ func TestAuthResource_requireAdminMiddleware_Forbidden(t *testing.T) {
 	}
 }
 
-func TestAuthResource_basicAuthExtractor_success(t *testing.T) {
+func TestAuthResource_basicAuthExtractor_Success(t *testing.T) {
 	authHeader := "Basic YWRtaW46c2VjcmV0"
 	e := echo.New()
 	req := test.NewRequest(echo.POST, "/", strings.NewReader(""))

@@ -29,7 +29,8 @@ func createUserResource(s service.UserService) echo.HandlerFunc {
 
 		user, err := s.Create(user)
 		if err != nil {
-			return newStatusWithMessage(http.StatusBadRequest, err.Error())
+			c.Logger().Error("Failure creating user.", err)
+			return newStatus(http.StatusInternalServerError)
 		}
 
 		return c.JSON(http.StatusCreated, user)
@@ -41,6 +42,9 @@ func getUserResource(s service.UserService) echo.HandlerFunc {
 		userId := c.Param("userid")
 		user, err := s.Find(userId)
 		if err != nil {
+			c.Logger().Error("Failure finding user.", err)
+			return newStatus(http.StatusInternalServerError)
+		} else if user == nil {
 			return newStatus(404)
 		}
 
@@ -52,7 +56,8 @@ func getUsersResource(s service.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		users, err := s.List()
 		if err != nil {
-			return err
+			c.Logger().Error("Failure listing users.", err)
+			return newStatus(http.StatusInternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, users)
@@ -72,7 +77,7 @@ func updateUserResource(s service.UserService) echo.HandlerFunc {
 		}
 
 		if user.Username != userId {
-			return newStatusWithMessage(http.StatusBadRequest, "Url userId '%s' and json userId '%s' are mismatched.", userId, user.Username)
+			return newStatusWithMessage(http.StatusBadRequest, "URL userId '%s' and JSON userId '%s' are mismatched.", userId, user.Username)
 		}
 
 		if authUser != userId && !isAdmin {
@@ -80,7 +85,7 @@ func updateUserResource(s service.UserService) echo.HandlerFunc {
 		}
 
 		if !isAdmin && user.IsAdmin {
-			return newStatusWithMessage(http.StatusForbidden, "Only admins may make other users admins.")
+			return newStatusWithMessage(http.StatusForbidden, "You can't elevate yourself to admin. Tsk tsk!")
 		}
 
 		if isAdmin && !user.IsAdmin && authUser == user.Username {
@@ -89,7 +94,8 @@ func updateUserResource(s service.UserService) echo.HandlerFunc {
 
 		user, err := s.Update(user)
 		if err != nil {
-			return newStatusWithMessage(http.StatusBadRequest, err.Error())
+			c.Logger().Error("Failure updating user.", err)
+			return newStatus(http.StatusInternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, user)
@@ -105,7 +111,8 @@ func deleteUserResource(s service.UserService) echo.HandlerFunc {
 		}
 
 		if err := s.Delete(userId); err != nil {
-			return err
+			c.Logger().Error("Failure deleting user.", err)
+			return newStatus(http.StatusInternalServerError)
 		}
 
 		c.Response().WriteHeader(http.StatusNoContent)
@@ -130,7 +137,8 @@ func updateUserPasswordResource(userService service.UserService) echo.HandlerFun
 		}
 
 		if err := userService.UpdateUserPassword(userId, passwordReset, isAdmin); err != nil {
-			return newStatusWithMessage(http.StatusBadRequest, "Password reset failed.")
+			c.Logger().Error("Password update failed.", err)
+			return newStatus(http.StatusInternalServerError)
 		}
 
 		c.Response().WriteHeader(http.StatusNoContent)
