@@ -557,6 +557,170 @@ func TestUserResource_deleteUserResource_DeleteSelf(t *testing.T) {
 	}
 }
 
+func TestUserResource_updateUserPasswordResource_SuccessUser(t *testing.T) {
+	username := "betty"
+	userSvc := new(mockservice.UserServiceMock)
+	passwordReset := &model.PasswordReset{
+		OldPassword: "oldpassword",
+		NewPassword: "newpassword",
+	}
+	body := marshallModel(passwordReset)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	userSvc.On("UpdateUserPassword", username, passwordReset, false).Return(nil)
+
+	handler := updateUserPasswordResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.NoError(t, err, "An error occured invoking handler.") {
+		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
+	}
+}
+
+func TestUserResource_updateUserPasswordResource_SuccessAdmin(t *testing.T) {
+	username := "betty"
+	userSvc := new(mockservice.UserServiceMock)
+	passwordReset := &model.PasswordReset{
+		NewPassword: "newpassword",
+	}
+	body := marshallModel(passwordReset)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = true
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	userSvc.On("UpdateUserPassword", username, passwordReset, true).Return(nil)
+
+	handler := updateUserPasswordResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.NoError(t, err, "An error occured invoking handler.") {
+		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
+	}
+}
+
+func TestUserResource_updateUserPasswordResource_Failure(t *testing.T) {
+	username := "betty"
+	userSvc := new(mockservice.UserServiceMock)
+	passwordReset := &model.PasswordReset{
+		OldPassword: "oldpassword",
+		NewPassword: "newpassword",
+	}
+	body := marshallModel(passwordReset)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	userSvc.On("UpdateUserPassword", username, passwordReset, false).Return(errors.New("Failure"))
+
+	handler := updateUserPasswordResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusInternalServerError, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+func TestUserResource_updateUserPasswordResource_BadJson(t *testing.T) {
+	username := "betty"
+	userSvc := new(mockservice.UserServiceMock)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader("Bad JSON"))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	handler := updateUserPasswordResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusBadRequest, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
+func TestUserResource_updateUserPasswordResource_NotAdminAndNotSelf(t *testing.T) {
+	username := "betty"
+	userSvc := new(mockservice.UserServiceMock)
+	passwordReset := &model.PasswordReset{
+		OldPassword: "oldpassword",
+		NewPassword: "newpassword",
+	}
+	body := marshallModel(passwordReset)
+	e := echo.New()
+	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "not" + username
+	claims["isAdmin"] = false
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	handler := updateUserPasswordResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusForbidden, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
 func marshallModel(m interface{}) string {
 	b, _ := json.Marshal(m)
 	return string(b)
