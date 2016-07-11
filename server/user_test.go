@@ -75,7 +75,6 @@ func TestUserResource_createUserResource_BadJson(t *testing.T) {
 }
 
 func TestUserResource_createUserResource_CreateError(t *testing.T) {
-	failureMsg := "Failure"
 	userSvc := new(mockservice.UserServiceMock)
 	e := echo.New()
 	user := &model.User{
@@ -87,7 +86,7 @@ func TestUserResource_createUserResource_CreateError(t *testing.T) {
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
 
-	userSvc.On("Create", user).Return(nil, errors.New(failureMsg))
+	userSvc.On("Create", user).Return(nil, errors.New("Failure"))
 
 	handler := createUserResource(userSvc)
 
@@ -96,8 +95,7 @@ func TestUserResource_createUserResource_CreateError(t *testing.T) {
 	userSvc.AssertExpectations(t)
 
 	if assert.Error(t, err, "Expected error not returned.") {
-		assert.Equal(t, err.(*smokeStatus).Code, http.StatusBadRequest, "Invalid status.")
-		assert.Equal(t, err.(*smokeStatus).Message, failureMsg, "Invalid message.")
+		assert.Equal(t, err.(*smokeStatus).Code, http.StatusInternalServerError, "Invalid status.")
 	}
 }
 
@@ -149,7 +147,7 @@ func TestUserResource_getUserResource_Failure(t *testing.T) {
 	userSvc.AssertExpectations(t)
 
 	if assert.Error(t, err, "Expected error not returned.") {
-		assert.Equal(t, http.StatusNotFound, err.(*smokeStatus).Code, "Invalid status.")
+		assert.Equal(t, http.StatusInternalServerError, err.(*smokeStatus).Code, "Invalid status.")
 	}
 }
 
@@ -200,7 +198,6 @@ func TestUserResource_getUsersResource_Failure(t *testing.T) {
 
 	if assert.Error(t, err, "Expected error not returned.") {
 		assert.Equal(t, http.StatusInternalServerError, err.(*smokeStatus).Code, "Invalid status.")
-		assert.Equal(t, failureMsg, err.(*smokeStatus).Message, "Invalid message.")
 	}
 }
 
@@ -472,16 +469,71 @@ func TestUserResource_updateUserResource_DemoteSelf(t *testing.T) {
 	}
 }
 
-func TestUserResource_updateUserResource_BOGUS(t *testing.T) {
-	username := "bambam"
+func TestUserResource_deleteUserResource_Success(t *testing.T) {
+	username := "pebbles"
 	userSvc := new(mockservice.UserServiceMock)
-	user := &model.User{
-		Username: username,
-		IsAdmin: false,
-	}
-	body := marshallModel(user)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.DELETE, "/users/" + username, strings.NewReader(""))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "not" + username
+	claims["isAdmin"] = true
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	userSvc.On("Delete", username).Return(nil)
+
+	handler := deleteUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.NoError(t, err, "An error occured invoking handler.") {
+		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
+	}
+}
+
+func TestUserResource_deleteUserResource_Failure(t *testing.T) {
+	username := "pebbles"
+	userSvc := new(mockservice.UserServiceMock)
+	e := echo.New()
+	req := test.NewRequest(echo.DELETE, "/users/" + username, strings.NewReader(""))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	req.Header().Set("Content-Type", "application/json")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "not" + username
+	claims["isAdmin"] = true
+	c.Set("user", token)
+	c.SetParamNames("userid")
+	c.SetParamValues(username)
+
+	userSvc.On("Delete", username).Return(errors.New("Failure"))
+
+	handler := deleteUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusInternalServerError, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
+func TestUserResource_deleteUserResource_DeleteSelf(t *testing.T) {
+	username := "pebbles"
+	userSvc := new(mockservice.UserServiceMock)
+	e := echo.New()
+	req := test.NewRequest(echo.DELETE, "/users/" + username, strings.NewReader(""))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -489,24 +541,22 @@ func TestUserResource_updateUserResource_BOGUS(t *testing.T) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["sub"] = username
-	claims["isAdmin"] = false
+	claims["isAdmin"] = true
 	c.Set("user", token)
 	c.SetParamNames("userid")
 	c.SetParamValues(username)
 
-	userSvc.On("Update", user).Return(user, nil)
+	userSvc.On("Delete", username).Return(nil)
 
-	handler := updateUserResource(userSvc)
+	handler := deleteUserResource(userSvc)
 
 	err := handler(c)
 
-	userSvc.AssertExpectations(t)
-
-	if assert.NoError(t, err, "An error occured invoking handler.") {
-		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
-		assert.Equal(t, body, res.Body.String(), "Invalid response.")
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusForbidden, err.(*smokeStatus).Code, "Invalid status.")
 	}
 }
+
 func marshallModel(m interface{}) string {
 	b, _ := json.Marshal(m)
 	return string(b)
