@@ -45,7 +45,7 @@ func getUserResource(s service.UserService) echo.HandlerFunc {
 			c.Logger().Error("Failure finding user.", err)
 			return newStatus(http.StatusInternalServerError)
 		} else if user == nil {
-			return newStatus(404)
+			return newStatus(http.StatusNotFound)
 		}
 
 		return c.JSON(http.StatusOK, user)

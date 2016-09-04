@@ -127,6 +127,29 @@ func TestUserResource_getUserResource_Success(t *testing.T) {
 	}
 }
 
+func TestUserResource_getUserResource_NotFound(t *testing.T) {
+	userId := "barney"
+	userSvc := new(mockservice.UserServiceMock)
+	e := echo.New()
+	req := test.NewRequest(echo.GET, "/users", strings.NewReader(""))
+	res := test.NewResponseRecorder()
+	c := e.NewContext(req, res)
+	c.SetParamNames("userid")
+	c.SetParamValues(userId)
+
+	userSvc.On("Find", userId).Return(nil, nil)
+
+	handler := getUserResource(userSvc)
+
+	err := handler(c)
+
+	userSvc.AssertExpectations(t)
+
+	if assert.Error(t, err, "Expected error not returned.") {
+		assert.Equal(t, http.StatusNotFound, err.(*smokeStatus).Code, "Invalid status.")
+	}
+}
+
 func TestUserResource_getUserResource_Failure(t *testing.T) {
 	userId := "barney"
 	failureMsg := "Failure"
