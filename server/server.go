@@ -57,7 +57,7 @@ func New(logger log.Logger, cfg config.Config, userService service.UserService, 
 	e := echo.New()
 	e.SetLogger(logger)
 
-	e.SetHTTPErrorHandler(smokeErrorHandler(e))
+	e.SetHTTPErrorHandler(smokeErrorHandler())
 
 	if debug := cfg.GetBool(config.Debug); debug {
 		e.SetDebug(debug)

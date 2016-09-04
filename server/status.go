@@ -40,7 +40,7 @@ func newStatusWithMessage(code int, format string, args ...interface{}) error {
 	}
 }
 
-func smokeErrorHandler(e *echo.Echo) echo.HTTPErrorHandler {
+func smokeErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
 		if status, ok := err.(*smokeStatus); ok {
 			if status.Code == http.StatusUnauthorized {
