@@ -14,6 +14,10 @@ type (
 	}
 )
 
+const (
+	unknownMessage = "Unknown message"
+)
+
 var statusMessages = map[int]string{
 	http.StatusForbidden:           "Forbidden",
 	http.StatusInternalServerError: "Internal server error",
@@ -22,7 +26,11 @@ var statusMessages = map[int]string{
 }
 
 func newStatus(code int) error {
-	return newStatusWithMessage(code, statusMessages[code])
+	msg := unknownMessage
+	if val, ok := statusMessages[code]; ok {
+		msg = val
+	}
+	return newStatusWithMessage(code, msg)
 }
 
 func newStatusWithMessage(code int, format string, args ...interface{}) error {
@@ -32,8 +40,7 @@ func newStatusWithMessage(code int, format string, args ...interface{}) error {
 	}
 }
 
-func smokeErrorHandler(e *echo.Echo) echo.HTTPErrorHandler {
-	defaultHttpErrorHandler := e.DefaultHTTPErrorHandler
+func smokeErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
 		if status, ok := err.(*smokeStatus); ok {
 			if status.Code == http.StatusUnauthorized {
@@ -53,8 +60,13 @@ func smokeErrorHandler(e *echo.Echo) echo.HTTPErrorHandler {
 				c.JSON(status.Code, status)
 			}
 		} else {
-			//TODO: override the default http error handler? add some additional logging?
-			defaultHttpErrorHandler(err, c)
+			c.Logger().Error("Non-HTTP error.", err)
+			code := http.StatusInternalServerError
+			status := newStatus(code)
+
+			if !c.Response().Committed() {
+				c.JSON(code, status)
+			}
 		}
 	}
 }
