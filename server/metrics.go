@@ -4,6 +4,7 @@ import (
 	"expvar"
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 	"time"
 
 	"github.com/infiniteprimates/smoke/config"
@@ -19,8 +20,7 @@ func startMetricsServer(cfg config.Config, log log.Logger) {
 	go func() {
 		ipAndPort := fmt.Sprintf("%s:%d", cfg.GetString(config.MetricsIp), cfg.GetInt(config.MetricsPort))
 		log.Info("Starting metrics server on ", ipAndPort)
-		http.ListenAndServe(ipAndPort, nil)
-		log.Fatal("Metrics server stopped running.")
+		log.Fatal(http.ListenAndServe(ipAndPort, nil))
 	}()
 }
 
