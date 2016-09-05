@@ -3,21 +3,25 @@ package server
 import (
 	"expvar"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
 	"time"
 
 	"github.com/infiniteprimates/smoke/config"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/fasthttp"
+	"github.com/labstack/echo/log"
 	"github.com/rcrowley/go-metrics"
-	"github.com/valyala/fasthttp/expvarhandler"
 )
 
-func createMetricsResources(r router, cfg config.Config, authMiddleware echo.MiddlewareFunc) {
+func startMetricsServer(cfg config.Config, log log.Logger) {
 	// start publishing metrics into expvars
 	go metricsToExpvar(time.Duration(cfg.GetInt(config.MetricsPublishingInterval)) * time.Second)
 
-	// expose expvars
-	r.GET("/metrics", fasthttp.WrapHandler(expvarhandler.ExpvarHandler), authMiddleware, requireAdminMiddleware("Only admins may access server information."))
+	go func() {
+		ipAndPort := fmt.Sprintf("%s:%d", cfg.GetString(config.MetricsIp), cfg.GetInt(config.MetricsPort))
+		log.Info("Starting metrics server on ", ipAndPort)
+		log.Fatal(http.ListenAndServe(ipAndPort, nil))
+	}()
 }
 
 func metricsToExpvar(interval time.Duration) {

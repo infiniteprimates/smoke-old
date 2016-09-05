@@ -8,7 +8,7 @@ import (
 	"github.com/infiniteprimates/smoke/config"
 	"github.com/infiniteprimates/smoke/service"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/fasthttp"
+	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/log"
 	"github.com/labstack/echo/middleware"
 )
@@ -18,6 +18,7 @@ type (
 		*echo.Echo
 		ip   string
 		port uint16
+		cfg config.Config
 	}
 
 	router interface {
@@ -85,6 +86,7 @@ func New(logger log.Logger, cfg config.Config, userService service.UserService, 
 		Echo: e,
 		ip:   ip,
 		port: uint16(port),
+		cfg: cfg,
 	}
 
 	return server, nil
@@ -93,7 +95,6 @@ func New(logger log.Logger, cfg config.Config, userService service.UserService, 
 func createResources(r router, cfg config.Config, userService service.UserService, authService service.AuthService) {
 	authMiddleWare := authorizationMiddleware(cfg.GetString(config.JwtKey))
 	group := r.Group("/api")
-	createMetricsResources(group, cfg, authMiddleWare)
 	createAuthResources(group, authService)
 	createUserResources(group, authMiddleWare, userService)
 }
@@ -104,6 +105,7 @@ func extractClaims(c echo.Context) jwt.MapClaims {
 
 func (server *server) Start() {
 	ipAndPort := fmt.Sprintf("%s:%d", server.ip, server.port)
-	//TODO: Log ipAndPort here
-	server.Run(fasthttp.New(ipAndPort))
+	startMetricsServer(server.cfg, server.Logger())
+	server.Logger().Info("Starting server on ", ipAndPort)
+	server.Run(standard.New(ipAndPort))
 }

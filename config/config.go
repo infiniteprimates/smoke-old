@@ -22,6 +22,8 @@ const (
 	DevCors                   = "dev_cors"
 	Ip                        = "ip"
 	JwtKey                    = "jwt_key"
+	MetricsIp                 = "metrics_ip"
+	MetricsPort               = "metrics_port"
 	MetricsPublishingInterval = "metrics_publishing_interval"
 	Port                      = "port"
 	UiRoot                    = "ui_root"
@@ -29,6 +31,8 @@ const (
 	defaultDebug                     = true
 	defaultDevCors                   = false
 	defaultIp                        = "0.0.0.0"
+	defaultMetricsIp                 = "0.0.0.0"
+	defaultMetricsPort               = 8081
 	defaultMetricsPublishingInterval = 15
 	defaultPort                      = 8080
 	defaultUiRoot                    = "dist"
@@ -53,6 +57,8 @@ func setDefaults(config *viper.Viper) {
 	config.SetDefault(Debug, defaultDebug)
 	config.SetDefault(DevCors, defaultDevCors)
 	config.SetDefault(Ip, defaultIp)
+	config.SetDefault(MetricsIp, defaultMetricsIp)
+	config.SetDefault(MetricsPort, defaultMetricsPort)
 	config.SetDefault(MetricsPublishingInterval, defaultMetricsPublishingInterval)
 	config.SetDefault(Port, defaultPort)
 	config.SetDefault(UiRoot, defaultUiRoot)
