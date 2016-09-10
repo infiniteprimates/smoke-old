@@ -82,15 +82,12 @@ func metricsToExpvar(interval time.Duration) {
 }
 
 func metricsMiddleware(name string) echo.MiddlewareFunc {
-	counter := metrics.NewCounter()
 	timer := metrics.NewTimer()
 
-	metrics.Register(fmt.Sprintf("api.%s.counter", name), counter)
 	metrics.Register(fmt.Sprintf("api.%s.timer", name), timer)
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			counter.Inc(1)
 			start := time.Now()
 			defer timer.UpdateSince(start)
 			return next(c)
