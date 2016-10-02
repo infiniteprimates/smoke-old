@@ -36,11 +36,17 @@ func metricsToExpvar(smokeMetrics *expvar.Map) {
 	metrics.DefaultRegistry.Each(func(name string, i interface{}) {
 		switch metric := i.(type) {
 		case metrics.Counter:
-			smokeMetrics.Add(name, metric.Count())
+			var count expvar.Int
+			count.Set(metric.Count())
+			smokeMetrics.Set(name, &count)
 		case metrics.Gauge:
-			smokeMetrics.Add(name, metric.Value())
+			var gauge expvar.Int
+			gauge.Set(metric.Value())
+			smokeMetrics.Set(name, &gauge)
 		case metrics.GaugeFloat64:
-			smokeMetrics.AddFloat(name, metric.Value())
+			var gauge expvar.Float
+			gauge.Set(metric.Value())
+			smokeMetrics.Set(name, &gauge)
 		case metrics.Histogram:
 			h := metric.Snapshot()
 			ps := h.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
