@@ -31,7 +31,7 @@ func TestUserService_Create_Success(t *testing.T) {
 
 	userDb.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured creating a user.") {
+	if assert.NoError(t, err, "An error occurred creating a user.") {
 		assert.Equal(t, user.Username, result.Username, "Username does not match.")
 		assert.Equal(t, user.IsAdmin, result.IsAdmin, "IsAdmin does not match.")
 	}
@@ -77,7 +77,7 @@ func TestUserService_Find_Success(t *testing.T) {
 
 	userDb.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured creating a user.") {
+	if assert.NoError(t, err, "An error occurred creating a user.") {
 		assert.Equal(t, userEntity.Username, result.Username, "Username does not match.")
 		assert.Equal(t, userEntity.IsAdmin, result.IsAdmin, "IsAdmin does not match.")
 	}
@@ -118,7 +118,7 @@ func TestUserService_List_Success(t *testing.T) {
 
 	userDb.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured listing users.") {
+	if assert.NoError(t, err, "An error occurred listing users.") {
 		assert.Len(t, result, len(userEntities), "Result length is incorrect.")
 		assert.Contains(t, result, user, "Expected user is not contained in the result.")
 	}
@@ -159,7 +159,7 @@ func TestUserService_Update_Success(t *testing.T) {
 
 	userDb.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured updating a user.") {
+	if assert.NoError(t, err, "An error occurred updating a user.") {
 		assert.Equal(t, user.Username, result.Username, "Username does not match.")
 		assert.Equal(t, user.IsAdmin, result.IsAdmin, "IsAdmin does not match.")
 	}
@@ -200,7 +200,7 @@ func TestUserService_Delete_Success(t *testing.T) {
 
 	userDb.AssertExpectations(t)
 
-	assert.NoError(t, err, "An error occured creating a user.")
+	assert.NoError(t, err, "An error occurred creating a user.")
 }
 
 func TestUserService_Delete_Error(t *testing.T) {
@@ -232,7 +232,7 @@ func TestUserService_UpdateUserPassword_SuccessNonAdmin(t *testing.T) {
 	userDb.AssertExpectations(t)
 	authSvc.AssertExpectations(t)
 
-	assert.NoError(t, err, "An error occured updating user password.")
+	assert.NoError(t, err, "An error occurred updating user password.")
 }
 
 func TestUserService_UpdateUserPassword_SuccessAdmin(t *testing.T) {
@@ -252,7 +252,7 @@ func TestUserService_UpdateUserPassword_SuccessAdmin(t *testing.T) {
 	userDb.AssertExpectations(t)
 	authSvc.AssertExpectations(t)
 
-	assert.NoError(t, err, "An error occured updating user password.")
+	assert.NoError(t, err, "An error occurred updating user password.")
 }
 
 func TestUserService_UpdateUserPassword_ErrorNonAdminBadAuth(t *testing.T) {

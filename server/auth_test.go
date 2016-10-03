@@ -43,7 +43,7 @@ func TestAuthResource_postAuthorizationResource_Success(t *testing.T) {
 
 	authSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Contains(t, res.Body.String(), token, "Invalid token.")
 	}
@@ -68,7 +68,7 @@ func TestAuthResource_postAuthorizationResource_Unauthorized(t *testing.T) {
 
 	authSvc.AssertExpectations(t)
 
-	if assert.Error(t, err, "An error occured invoking handler.") {
+	if assert.Error(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusUnauthorized, err.(*smokeStatus).Code, "Invalid status.")
 	}
 }
@@ -95,7 +95,7 @@ func TestAuthResource_requireAdminMiddleware_Success(t *testing.T) {
 	mw := requireAdminMiddleware(failureMsg)
 	err := mw(func(ctx echo.Context) error { return c.String(http.StatusOK, successMsg) })(c)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Contains(t, res.Body.String(), successMsg, "Invalid body.")
 	}
@@ -135,7 +135,7 @@ func TestAuthResource_basicAuthExtractor_Success(t *testing.T) {
 	mw := basicAuthExtractor()
 	err := mw(func(ctx echo.Context) error { return c.String(http.StatusOK, "") })(c)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, "admin", c.Get("username"), "Invalid username.")
 		assert.Equal(t, "secret", c.Get("password"), "Invalid password.")
 	}

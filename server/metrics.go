@@ -4,7 +4,7 @@ import (
 	"expvar"
 	"fmt"
 	"net/http"
-	_ "net/http/pprof"
+	_ "net/http/pprof" // Needed to enable pprof
 	"time"
 
 	"github.com/infiniteprimates/smoke/config"
@@ -27,7 +27,7 @@ func startMetricsServer(cfg config.Config, log log.Logger) {
 func gatherMetrics(interval time.Duration) {
 	smokeMetrics := expvar.NewMap("smokeMetrics")
 
-	for _ = range time.Tick(interval) {
+	for range time.Tick(interval) {
 		metricsToExpvar(smokeMetrics)
 	}
 }

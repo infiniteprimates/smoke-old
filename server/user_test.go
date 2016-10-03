@@ -13,8 +13,8 @@ import (
 	"github.com/infiniteprimates/smoke/model"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/test"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestUserResource_createUserResources(t *testing.T) {
@@ -32,7 +32,7 @@ func TestUserResource_createUserResource_Success(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: "fred",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	body := marshallModel(user)
 	e := echo.New()
@@ -49,7 +49,7 @@ func TestUserResource_createUserResource_Success(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusCreated, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
 	}
@@ -79,7 +79,7 @@ func TestUserResource_createUserResource_CreateError(t *testing.T) {
 	e := echo.New()
 	user := &model.User{
 		Username: "fred",
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	req := test.NewRequest(echo.POST, "/users", strings.NewReader(marshallModel(user)))
 	res := test.NewResponseRecorder()
@@ -110,7 +110,7 @@ func TestUserResource_getUserResource_Success(t *testing.T) {
 	c.SetParamValues(userId)
 	user := &model.User{
 		Username: userId,
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 
 	userSvc.On("Find", userId).Return(user, nil)
@@ -179,7 +179,7 @@ func TestUserResource_getUsersResource_Success(t *testing.T) {
 	users := []*model.User{
 		{
 			Username: "fred",
-			IsAdmin: false,
+			IsAdmin:  false,
 		},
 	}
 	e := echo.New()
@@ -196,7 +196,7 @@ func TestUserResource_getUsersResource_Success(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, marshallModel(users), res.Body.String(), "Invalid response.")
 	}
@@ -229,11 +229,11 @@ func TestUserResource_updateUserResource_SuccessUser(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: username,
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	body := marshallModel(user)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -254,7 +254,7 @@ func TestUserResource_updateUserResource_SuccessUser(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
 	}
@@ -265,11 +265,11 @@ func TestUserResource_updateUserResource_SuccessAdmin(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: username,
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	body := marshallModel(user)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -290,7 +290,7 @@ func TestUserResource_updateUserResource_SuccessAdmin(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
 	}
@@ -302,11 +302,11 @@ func TestUserResource_updateUserResource_UpdateFailed(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: username,
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	body := marshallModel(user)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -336,7 +336,7 @@ func TestUserResource_updateUserResource_BadJson(t *testing.T) {
 	username := "bambam"
 	userSvc := new(mockservice.UserServiceMock)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader("Bad JSON"))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader("Bad JSON"))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -365,7 +365,7 @@ func TestUserResource_updateUserResource_UrlAndModelMismatch(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: username,
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	body := marshallModel(user)
 	e := echo.New()
@@ -398,11 +398,11 @@ func TestUserResource_updateUserResource_NotAdminAndNotSelf(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: username,
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	body := marshallModel(user)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -431,11 +431,11 @@ func TestUserResource_updateUserResource_NotAdminMakeSelfAdmin(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: username,
-		IsAdmin: true,
+		IsAdmin:  true,
 	}
 	body := marshallModel(user)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -464,11 +464,11 @@ func TestUserResource_updateUserResource_DemoteSelf(t *testing.T) {
 	userSvc := new(mockservice.UserServiceMock)
 	user := &model.User{
 		Username: username,
-		IsAdmin: false,
+		IsAdmin:  false,
 	}
 	body := marshallModel(user)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -496,7 +496,7 @@ func TestUserResource_deleteUserResource_Success(t *testing.T) {
 	username := "pebbles"
 	userSvc := new(mockservice.UserServiceMock)
 	e := echo.New()
-	req := test.NewRequest(echo.DELETE, "/users/" + username, strings.NewReader(""))
+	req := test.NewRequest(echo.DELETE, "/users/"+username, strings.NewReader(""))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -517,7 +517,7 @@ func TestUserResource_deleteUserResource_Success(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
 	}
 }
@@ -526,7 +526,7 @@ func TestUserResource_deleteUserResource_Failure(t *testing.T) {
 	username := "pebbles"
 	userSvc := new(mockservice.UserServiceMock)
 	e := echo.New()
-	req := test.NewRequest(echo.DELETE, "/users/" + username, strings.NewReader(""))
+	req := test.NewRequest(echo.DELETE, "/users/"+username, strings.NewReader(""))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -556,7 +556,7 @@ func TestUserResource_deleteUserResource_DeleteSelf(t *testing.T) {
 	username := "pebbles"
 	userSvc := new(mockservice.UserServiceMock)
 	e := echo.New()
-	req := test.NewRequest(echo.DELETE, "/users/" + username, strings.NewReader(""))
+	req := test.NewRequest(echo.DELETE, "/users/"+username, strings.NewReader(""))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -589,7 +589,7 @@ func TestUserResource_updateUserPasswordResource_SuccessUser(t *testing.T) {
 	}
 	body := marshallModel(passwordReset)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -610,7 +610,7 @@ func TestUserResource_updateUserPasswordResource_SuccessUser(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
 	}
 }
@@ -623,7 +623,7 @@ func TestUserResource_updateUserPasswordResource_SuccessAdmin(t *testing.T) {
 	}
 	body := marshallModel(passwordReset)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -644,7 +644,7 @@ func TestUserResource_updateUserPasswordResource_SuccessAdmin(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
 	}
 }
@@ -658,7 +658,7 @@ func TestUserResource_updateUserPasswordResource_Failure(t *testing.T) {
 	}
 	body := marshallModel(passwordReset)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -687,7 +687,7 @@ func TestUserResource_updateUserPasswordResource_BadJson(t *testing.T) {
 	username := "betty"
 	userSvc := new(mockservice.UserServiceMock)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader("Bad JSON"))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader("Bad JSON"))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
@@ -720,7 +720,7 @@ func TestUserResource_updateUserPasswordResource_NotAdminAndNotSelf(t *testing.T
 	}
 	body := marshallModel(passwordReset)
 	e := echo.New()
-	req := test.NewRequest(echo.PUT, "/users/" + username, strings.NewReader(body))
+	req := test.NewRequest(echo.PUT, "/users/"+username, strings.NewReader(body))
 	res := test.NewResponseRecorder()
 	c := e.NewContext(req, res)
 	req.Header().Set("Content-Type", "application/json")
