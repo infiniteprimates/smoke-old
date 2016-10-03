@@ -1,0 +1,6 @@
+# Seems to be licensed with something like a 3-clause BSD
+platform:
+  Go:
+    golang.org/x/text:
+      tests:
+        unlicensed: skip
