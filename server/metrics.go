@@ -4,7 +4,7 @@ import (
 	"expvar"
 	"fmt"
 	"net/http"
-	_ "net/http/pprof"
+	_ "net/http/pprof" // Needed to enable pprof
 	"time"
 
 	"github.com/infiniteprimates/smoke/config"
