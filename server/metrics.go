@@ -27,7 +27,7 @@ func startMetricsServer(cfg config.Config, log log.Logger) {
 func gatherMetrics(interval time.Duration) {
 	smokeMetrics := expvar.NewMap("smokeMetrics")
 
-	for _ = range time.Tick(interval) {
+	for range time.Tick(interval) {
 		metricsToExpvar(smokeMetrics)
 	}
 }

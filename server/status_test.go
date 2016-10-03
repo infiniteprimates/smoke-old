@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/test"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStatusResource_newStatus_Success(t *testing.T) {
@@ -133,7 +133,7 @@ func TestStatusResource_smokeErrorHandler_error(t *testing.T) {
 
 func unmarshallSmokeStatus(s string) smokeStatus {
 	var status smokeStatus
-	if err := json.Unmarshal([]byte(s), &status) ; err != nil {
+	if err := json.Unmarshal([]byte(s), &status); err != nil {
 		panic(err)
 	}
 	return status

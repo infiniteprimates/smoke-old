@@ -18,7 +18,7 @@ type (
 		*echo.Echo
 		ip   string
 		port uint16
-		cfg config.Config
+		cfg  config.Config
 	}
 
 	router interface {
@@ -86,7 +86,7 @@ func New(logger log.Logger, cfg config.Config, userService service.UserService, 
 		Echo: e,
 		ip:   ip,
 		port: uint16(port),
-		cfg: cfg,
+		cfg:  cfg,
 	}
 
 	return server, nil
