@@ -49,7 +49,7 @@ func TestUserResource_createUserResource_Success(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusCreated, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
 	}
@@ -196,7 +196,7 @@ func TestUserResource_getUsersResource_Success(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, marshallModel(users), res.Body.String(), "Invalid response.")
 	}
@@ -254,7 +254,7 @@ func TestUserResource_updateUserResource_SuccessUser(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
 	}
@@ -290,7 +290,7 @@ func TestUserResource_updateUserResource_SuccessAdmin(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusOK, res.Status(), "Invalid status.")
 		assert.Equal(t, body, res.Body.String(), "Invalid response.")
 	}
@@ -517,7 +517,7 @@ func TestUserResource_deleteUserResource_Success(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
 	}
 }
@@ -610,7 +610,7 @@ func TestUserResource_updateUserPasswordResource_SuccessUser(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
 	}
 }
@@ -644,7 +644,7 @@ func TestUserResource_updateUserPasswordResource_SuccessAdmin(t *testing.T) {
 
 	userSvc.AssertExpectations(t)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		assert.Equal(t, http.StatusNoContent, res.Status(), "Invalid status.")
 	}
 }

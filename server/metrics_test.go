@@ -151,7 +151,7 @@ func TestMetrics_metricsMiddleware(t *testing.T) {
 	mw := metricsMiddleware("rest")
 	err := mw(func(ctx echo.Context) error { return c.String(http.StatusOK, "OK") })(c)
 
-	if assert.NoError(t, err, "An error occured invoking handler.") {
+	if assert.NoError(t, err, "An error occurred invoking handler.") {
 		timer := metrics.DefaultRegistry.Get("api.rest.timer").(metrics.Timer)
 		assert.NotZero(t, timer.Min(), "Timer duration was zero.")
 

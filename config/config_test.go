@@ -21,7 +21,7 @@ func TestDefaults(t *testing.T) {
 	os.Clearenv()
 	initRequired()
 	config, err := GetConfig()
-	assert.Nil(t, err, "An error occured instantiating a config.")
+	assert.Nil(t, err, "An error occurred instantiating a config.")
 
 	assert.Equal(t, defaultDebug, config.GetBool(Debug), "Config '%s' default is incorrect.", Debug)
 	assert.Equal(t, defaultDevCors, config.GetBool(DevCors), "Config '%s' default is incorrect.", DevCors)
@@ -35,7 +35,7 @@ func TestValues(t *testing.T) {
 	os.Clearenv()
 	initRequired()
 	config, err := GetConfig()
-	assert.Nil(t, err, "An error occured instantiating a config.")
+	assert.Nil(t, err, "An error occurred instantiating a config.")
 
 	ip := "ip"
 	metricsLoggingInterval := 120
