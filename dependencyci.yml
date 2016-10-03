@@ -1,13 +1,10 @@
-# Seems to be licensed with something like a 3-clause BSD
 platform:
   Go:
+    # Seems to be licensed with something like a 3-clause BSD
     golang.org/x/text:
       tests:
         unlicensed: skip
-
-# Seems to be like an Unlicense license
-platform:
-  Go:
+    # Seems to be like an Unlicense license
     github.com/pelletier/go-buffruneio:
       tests:
         unlicensed: skip
